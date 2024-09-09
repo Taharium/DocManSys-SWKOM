@@ -1,0 +1,6 @@
+@DocManSys_SWKOM_HostAddress = http://localhost:5008
+
+GET {{DocManSys_SWKOM_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
