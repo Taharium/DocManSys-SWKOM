@@ -1,6 +1,6 @@
-@DocManSys_SWKOM_HostAddress = http://localhost:5008
+@DocManSys_RestAPI_HostAddress = http://localhost:5008
 
-GET {{DocManSys_SWKOM_HostAddress}}/weatherforecast/
+GET {{DocManSys_RestAPI_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
