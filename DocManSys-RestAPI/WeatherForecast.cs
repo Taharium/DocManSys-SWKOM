@@ -1,4 +1,4 @@
-namespace DocManSys_SWKOM {
+namespace DocManSys_RestAPI {
     public class WeatherForecast {
         public DateOnly Date { get; set; }
 
