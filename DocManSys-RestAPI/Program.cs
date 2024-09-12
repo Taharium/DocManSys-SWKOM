@@ -1,4 +1,7 @@
 
+using DocManSys_RestAPI.Models;
+using Microsoft.EntityFrameworkCore;
+
 namespace DocManSys_RestAPI {
     public class Program {
         public static void Main(string[] args) {
@@ -7,6 +10,7 @@ namespace DocManSys_RestAPI {
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddDbContext<DocumentContext>(opt => opt.UseInMemoryDatabase("DocumentList"));
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
