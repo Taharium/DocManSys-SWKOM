@@ -1,6 +1,9 @@
 services:
   rest-api:
-    build: .
+    build:
+      context: .
+      dockerfile: DocManSys-RestAPI/Dockerfile
     ports:
       - "8081:8080"
+
     
