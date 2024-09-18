@@ -9,6 +9,9 @@ using DocManSys_RestAPI.Models;
 
 namespace DocManSys_RestAPI.Controllers
 {
+    /// <summary>
+    /// Document Controller with GET, PUT, POST, DELETE methods
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class DocumentController : ControllerBase
@@ -21,6 +24,10 @@ namespace DocManSys_RestAPI.Controllers
         }
 
         // GET: api/Document
+        /// <summary>
+        /// Get all documents
+        /// </summary>
+        /// <returns>IEnumerable<Document></Document>></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Document>>> GetDocuments()
         {
@@ -28,6 +35,11 @@ namespace DocManSys_RestAPI.Controllers
         }
 
         // GET: api/Document/5
+        /// <summary>
+        /// Get a document by id
+        /// </summary>
+        /// <param name="id">Id of the document that should be searched for</param>
+        /// <returns><Document></Document>></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Document>> GetDocument(int id)
         {
@@ -43,6 +55,12 @@ namespace DocManSys_RestAPI.Controllers
 
         // PUT: api/Document/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Update Document entry
+        /// </summary>
+        /// <param name="id">Id of the document that should be updated</param>
+        /// <param name="document">the data that should be in the updated document</param>
+        /// <returns>Returns bad Status Codes if something went wrong</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDocument(int id, Document document)
         {
@@ -74,6 +92,11 @@ namespace DocManSys_RestAPI.Controllers
 
         // POST: api/Document
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Create a new Document entry
+        /// </summary>
+        /// <param name="document">new document that should be added in the database</param>
+        /// <returns><CreatedAtAction></CreatedAtAction>></returns>
         [HttpPost]
         public async Task<ActionResult<Document>> PostDocument(Document document)
         {
@@ -84,6 +107,11 @@ namespace DocManSys_RestAPI.Controllers
         }
 
         // DELETE: api/Document/5
+        /// <summary>
+        /// Delete a Document entry
+        /// </summary>
+        /// <param name="id">id of the document that should be deleted</param>
+        /// <returns>Returns bad Status Codes if something went wrong</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDocument(int id)
         {

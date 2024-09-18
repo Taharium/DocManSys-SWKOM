@@ -7,6 +7,7 @@
     <RootNamespace>DocManSys_RestAPI</RootNamespace>
     <UserSecretsId>5236f0ce-0641-456b-94d7-db2a191db46f</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
