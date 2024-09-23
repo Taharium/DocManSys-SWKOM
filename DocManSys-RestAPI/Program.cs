@@ -7,6 +7,19 @@ namespace DocManSys_RestAPI {
         public static void Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
 
+            // CORS konfigurieren, um Anfragen von localhost:80 (WebUI) zuzulassen
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowWebUI",
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost") // Die URL deiner Web-UI
+                            .AllowAnyHeader()
+                            .AllowAnyOrigin()
+                            .AllowAnyMethod();
+                    });
+            });
+
             // Add services to the container.
 
             builder.Services.AddControllers();
