@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebUI", "WebUI\WebUI.csproj", "{1B0E0A9D-7938-4C48-BAAA-CB243D4DE8E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{4B89AF27-1BEB-4FCD-95D9-036E9D175947}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B89AF27-1BEB-4FCD-95D9-036E9D175947}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B89AF27-1BEB-4FCD-95D9-036E9D175947}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B0E0A9D-7938-4C48-BAAA-CB243D4DE8E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B0E0A9D-7938-4C48-BAAA-CB243D4DE8E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B0E0A9D-7938-4C48-BAAA-CB243D4DE8E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B0E0A9D-7938-4C48-BAAA-CB243D4DE8E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

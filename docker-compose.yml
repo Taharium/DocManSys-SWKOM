@@ -1,11 +1,23 @@
 services:
   rest-api:
+    image: docmansys-rest-api
     build:
       context: .
       dockerfile: DocManSys-RestAPI/Dockerfile
     ports:
-      - "8080:80"
+      - "8081:8081"
     environment:
-      - ASPNETCORE_URLS=http://+:80
-
-    
+      - ASPNETCORE_URLS=http://+:8081
+  
+  webUI:
+    image: docmansys-webui
+    build:
+      context: ./WebUI
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+    volumes:
+      - ./WebUI/nginx.conf:/etc/nginx/nginx.conf  # Binde die Nginx-Konfigurationsdatei ein
+      - ./WebUI/wwwroot:/app/wwwroot  # Statische Dateien mounten
+    depends_on:
+      - rest-api
