@@ -23,7 +23,7 @@ namespace DocManSys_RestAPI {
             // Add services to the container.
 
             builder.Services.AddControllers();
-            builder.Services.AddDbContext<DocumentContext>(opt => opt.UseInMemoryDatabase("DocumentList"));
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
@@ -34,6 +34,10 @@ namespace DocManSys_RestAPI {
                 c.IncludeXmlComments(xmlPath);
             });
 
+            builder.Services.AddHttpClient("DocManSys-DAL", client => {
+                client.BaseAddress = new Uri("http://docman-sysdal:8082");
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -41,6 +45,8 @@ namespace DocManSys_RestAPI {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseCors("AllowWebUI");
 
             app.UseHttpsRedirection();
 
