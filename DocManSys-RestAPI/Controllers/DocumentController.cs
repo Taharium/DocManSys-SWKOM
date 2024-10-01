@@ -14,13 +14,11 @@ namespace DocManSys_RestAPI.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
-    public class DocumentController : ControllerBase
-    {
-        private readonly DocumentContext _context;
+    public class DocumentController : ControllerBase {
+        private readonly IHttpClientFactory _clientFactory;
 
-        public DocumentController(DocumentContext context)
-        {
-            _context = context;
+        public DocumentController(IHttpClientFactory clientFactory) {
+            _clientFactory = clientFactory;
         }
 
         // GET: api/Document
@@ -29,9 +27,17 @@ namespace DocManSys_RestAPI.Controllers
         /// </summary>
         /// <returns>IEnumerable<Document></Document>></returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Document>>> GetDocuments()
-        {
-            return await _context.Documents.ToListAsync();
+        public async Task<ActionResult<IEnumerable<Document>>> GetDocuments() {
+            var client = _clientFactory.CreateClient("DocumentsDAL");
+            var response = await client.GetAsync("api/Document");
+
+            if (response.IsSuccessStatusCode) {
+                var items = await response.Content.ReadFromJsonAsync<IEnumerable<Document>>();
+                return Ok(items);
+            }
+
+            return StatusCode((int)response.StatusCode, "Error retrieving Documents from DAL");
+
         }
 
         // GET: api/Document/5
@@ -41,16 +47,16 @@ namespace DocManSys_RestAPI.Controllers
         /// <param name="id">Id of the document that should be searched for</param>
         /// <returns><Document></Document>></returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Document>> GetDocument(int id)
-        {
-            var document = await _context.Documents.FindAsync(id);
-
-            if (document == null)
-            {
+        public async Task<ActionResult<Document>> GetDocument(int id) {
+            var client = _clientFactory.CreateClient("DocumentsDAL");
+            var response = await client.GetAsync($"api/Document/{id}");
+            if (response.IsSuccessStatusCode) {
+                var item = await response.Content.ReadFromJsonAsync<Document>();
+                if (item != null) return Ok(item);
                 return NotFound();
             }
 
-            return document;
+            return StatusCode((int)response.StatusCode, "Error retrieving Document from DAL");
         }
 
         // PUT: api/Document/5
@@ -62,32 +68,16 @@ namespace DocManSys_RestAPI.Controllers
         /// <param name="document">the data that should be in the updated document</param>
         /// <returns>Returns bad Status Codes if something went wrong</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDocument(int id, Document document)
-        {
-            if (id != document.Id)
-            {
-                return BadRequest();
+        public async Task<IActionResult> PutDocument(int id, Document document) {
+            if (id != document.Id) return BadRequest();
+
+            var client = _clientFactory.CreateClient("DocumentsDAL");
+            var response = await client.PutAsJsonAsync($"api/Document/{id}", document);
+            if (response.IsSuccessStatusCode) {
+                return NoContent();
             }
 
-            _context.Entry(document).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DocumentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return StatusCode((int)response.StatusCode, "Error updating Document in DAL");
         }
 
         // POST: api/Document
@@ -98,12 +88,16 @@ namespace DocManSys_RestAPI.Controllers
         /// <param name="document">new document that should be added in the database</param>
         /// <returns><CreatedAtAction></CreatedAtAction>></returns>
         [HttpPost]
-        public async Task<ActionResult<Document>> PostDocument(Document document)
-        {
-            _context.Documents.Add(document);
-            await _context.SaveChangesAsync();
+        public async Task<IActionResult> PostDocument(Document document) {
+            var client = _clientFactory.CreateClient("DocumentsDAL");
+            var response = await client.PostAsJsonAsync("api/Document", document);
+            if (response.IsSuccessStatusCode) {
+                var item = await response.Content.ReadFromJsonAsync<Document>();
+                if (item != null)
+                    return CreatedAtAction(nameof(GetDocument), new { id = item.Id }, item);
+            }
 
-            return CreatedAtAction("GetDocument", new { id = document.Id }, document);
+            return StatusCode((int)response.StatusCode, "Error creating Document in DAL");
         }
 
         // DELETE: api/Document/5
@@ -113,23 +107,13 @@ namespace DocManSys_RestAPI.Controllers
         /// <param name="id">id of the document that should be deleted</param>
         /// <returns>Returns bad Status Codes if something went wrong</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDocument(int id)
-        {
-            var document = await _context.Documents.FindAsync(id);
-            if (document == null)
-            {
-                return NotFound();
+        public async Task<IActionResult> DeleteDocument(int id) {
+            var client = _clientFactory.CreateClient("DocumentsDAL");
+            var response = await client.DeleteAsync($"api/Document/{id}");
+            if (response.IsSuccessStatusCode) {
+                return NoContent();
             }
-
-            _context.Documents.Remove(document);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool DocumentExists(int id)
-        {
-            return _context.Documents.Any(e => e.Id == id);
+            return StatusCode((int)response.StatusCode, "Error deleting Document in DAL");
         }
     }
 }
