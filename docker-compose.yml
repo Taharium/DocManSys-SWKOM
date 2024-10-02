@@ -9,7 +9,7 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:8081
     depends_on:
-      - docman-sysdal
+      - docmansys-dal
 
   webUI:
     image: docmansys-webui
@@ -24,9 +24,7 @@ services:
     depends_on:
       - rest-api
 
-
-
-  docman-sysdal:
+  docmansys-dal:
     image: docmansys-dal_image
     build:
       context: ./DocManSys-DAL
@@ -34,7 +32,6 @@ services:
     ports:
       - "8082:8082"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8082
     depends_on:
       - db
@@ -51,6 +48,7 @@ services:
       - postgres_data:/var/lib/postgresql/data  # Bind the volume for persistent storage
     networks:
      - postgres
+  
   pgadmin:
     container_name: pgadmin_container
     image: dpage/pgadmin4:latest
@@ -65,9 +63,9 @@ services:
     networks:
       - postgres
     restart: unless-stopped
-
+ 
 networks:
-   postgres:
+  postgres:
     driver: bridge
 
 volumes:

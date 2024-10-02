@@ -1,5 +1,6 @@
 
 using DocManSys_DAL.Data;
+using DocManSys_DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace DocManSys_DAL {
@@ -13,6 +14,7 @@ namespace DocManSys_DAL {
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DataBaseConnection")));
 
             //Repositories registration
+            builder.Services.AddScoped<IDocumentRepository,DocumentRepository>();
 
             var app = builder.Build();
 

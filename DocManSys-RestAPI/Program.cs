@@ -35,7 +35,7 @@ namespace DocManSys_RestAPI {
             });
 
             builder.Services.AddHttpClient("DocManSys-DAL", client => {
-                client.BaseAddress = new Uri("http://docman-sysdal:8082");
+                client.BaseAddress = new Uri("http://docmansys-dal:8082");
             });
 
             var app = builder.Build();
@@ -49,7 +49,8 @@ namespace DocManSys_RestAPI {
             app.UseCors("AllowWebUI");
 
             app.UseHttpsRedirection();
-
+            
+            //app.Urls.Add("http://*:8081");
             app.UseAuthorization();
 
 

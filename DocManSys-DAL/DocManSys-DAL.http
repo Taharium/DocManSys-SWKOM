@@ -1,6 +1,6 @@
 @DocManSys_DAL_HostAddress = http://localhost:5142
 
-GET {{DocManSys_DAL_HostAddress}}/weatherforecast/
+GET {{DocManSys_DAL_HostAddress}}/
 Accept: application/json
 
 ###

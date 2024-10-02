@@ -1,33 +1,31 @@
-const apiUrl = 'http://localhost:8081/api/document/';
+const apiUrl = 'http://localhost:8081/api/document';
 
 // Function to fetch and display Documents 
 function fetchDocuments() {
     console.log('Fetching Documents items...');
     fetch(apiUrl)
-        .then(response => response.json())
+        .then(response => 
+            response.json()
+        )
         .then(data => {
             const documentList = document.getElementById('documentList');
             console.log(data)
             documentList.innerHTML = ''; // Clear the list before appending new items
-            data.forEach(document => {
-                console.log(document)
+            data.forEach(doc => {
+                console.log(doc)
                 // Create list item with delete and toggle complete buttons
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    <span>Document: ${document.name} | Completed: ${document.author}</span>
-                    <button class="delete" style="margin-left: 10px;" onclick="deleteDocument(${document.id})">Delete</button>
-                    <button style="margin-left: 10px;" onclick="toggleComplete(${document.id}, ${document.isComplete}, '${document.name}')">
-                        Mark as ${document.Title}
+                    <span>Document: ${doc.id} | Title: ${doc.title}</span>
+                    <button class="delete" style="margin-left: 10px;" onclick="deleteDocument(${doc.id})">Delete</button>
+                    <button style="margin-left: 10px;" onclick="toggleComplete(${doc.id}, ${doc.title}, '${doc.title}')">
+                        Mark as ${doc.title}
                     </button>
                 `;
                 documentList.appendChild(li);
             });
         })
         .catch(error => console.error('Fehler beim Abrufen der Documents:', error));
-}
-
-function test(){
-    alert("h");
 }
 
 // Function to add a new Document

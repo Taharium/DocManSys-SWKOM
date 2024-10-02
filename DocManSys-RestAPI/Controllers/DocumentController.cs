@@ -12,8 +12,8 @@ namespace DocManSys_RestAPI.Controllers
     /// <summary>
     /// Document Controller with GET, PUT, POST, DELETE methods
     /// </summary>
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class DocumentController : ControllerBase {
         private readonly IHttpClientFactory _clientFactory;
 
@@ -27,9 +27,9 @@ namespace DocManSys_RestAPI.Controllers
         /// </summary>
         /// <returns>IEnumerable<Document></Document>></returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Document>>> GetDocuments() {
-            var client = _clientFactory.CreateClient("DocumentsDAL");
-            var response = await client.GetAsync("api/Document");
+        public async Task<IActionResult> GetDocuments() {
+            var client = _clientFactory.CreateClient("DocManSys-DAL");
+            var response = await client.GetAsync("/api/document");
 
             if (response.IsSuccessStatusCode) {
                 var items = await response.Content.ReadFromJsonAsync<IEnumerable<Document>>();
@@ -47,9 +47,9 @@ namespace DocManSys_RestAPI.Controllers
         /// <param name="id">Id of the document that should be searched for</param>
         /// <returns><Document></Document>></returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Document>> GetDocument(int id) {
-            var client = _clientFactory.CreateClient("DocumentsDAL");
-            var response = await client.GetAsync($"api/Document/{id}");
+        public async Task<IActionResult> GetDocument(int id) {
+            var client = _clientFactory.CreateClient("DocManSys-DAL");
+            var response = await client.GetAsync($"/api/document/{id}");
             if (response.IsSuccessStatusCode) {
                 var item = await response.Content.ReadFromJsonAsync<Document>();
                 if (item != null) return Ok(item);
@@ -71,8 +71,8 @@ namespace DocManSys_RestAPI.Controllers
         public async Task<IActionResult> PutDocument(int id, Document document) {
             if (id != document.Id) return BadRequest();
 
-            var client = _clientFactory.CreateClient("DocumentsDAL");
-            var response = await client.PutAsJsonAsync($"api/Document/{id}", document);
+            var client = _clientFactory.CreateClient("DocManSys-DAL");
+            var response = await client.PutAsJsonAsync($"/api/document/{id}", document);
             if (response.IsSuccessStatusCode) {
                 return NoContent();
             }
@@ -89,8 +89,8 @@ namespace DocManSys_RestAPI.Controllers
         /// <returns><CreatedAtAction></CreatedAtAction>></returns>
         [HttpPost]
         public async Task<IActionResult> PostDocument(Document document) {
-            var client = _clientFactory.CreateClient("DocumentsDAL");
-            var response = await client.PostAsJsonAsync("api/Document", document);
+            var client = _clientFactory.CreateClient("DocManSys-DAL");
+            var response = await client.PostAsJsonAsync("/api/document", document);
             if (response.IsSuccessStatusCode) {
                 var item = await response.Content.ReadFromJsonAsync<Document>();
                 if (item != null)
@@ -108,8 +108,8 @@ namespace DocManSys_RestAPI.Controllers
         /// <returns>Returns bad Status Codes if something went wrong</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDocument(int id) {
-            var client = _clientFactory.CreateClient("DocumentsDAL");
-            var response = await client.DeleteAsync($"api/Document/{id}");
+            var client = _clientFactory.CreateClient("DocManSys-DAL");
+            var response = await client.DeleteAsync($"/api/document/{id}");
             if (response.IsSuccessStatusCode) {
                 return NoContent();
             }
