@@ -16,6 +16,11 @@ namespace DocManSys_DAL.Data {
                 entity.Property(e => e.Title)
                     .IsRequired()
                     .HasMaxLength(150);  // Konfiguriert den "Name"-Spalten
+                
+                entity.Property(e => e.Author)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Image);
             });
 
             base.OnModelCreating(modelBuilder);

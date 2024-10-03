@@ -1,3 +1,7 @@
 .aquaColor {
     color: aqua;
 }
+
+.noBulletPoints {
+    list-style-type: none;
+}

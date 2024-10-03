@@ -16,13 +16,22 @@ function fetchDocuments() {
                 // Create list item with delete and toggle complete buttons
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    <span>Document: ${doc.id} | Title: ${doc.title}</span>
-                    <button class="delete" style="margin-left: 10px;" onclick="deleteDocument(${doc.id})">Delete</button>
-                    <button style="margin-left: 10px;" onclick="toggleComplete(${doc.id}, ${doc.title}, '${doc.title}')">
+                    <div class="card w-25 ">
+                        <img src="${doc.image}" class="card-img-top" alt="${doc.title}">
+                        <div class="card-body">
+                            <h5 class="card-title">${doc.title}</h5>
+                            <p class="card-text">Written by the Author: ${doc.author}</p>
+                            <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
+                        </div>
+                    </div>
+                    <!--<span>Document: ${doc.id} | Title: ${doc.title}</span>
+                    <button class="btn btn-danger ms-2" onclick="deleteDocument(${doc.id})">Delete</button>
+                    <button class="btn btn-primary ms-2" onclick="toggleComplete(${doc.id}, ${doc.title}, '${doc.title}')">
                         Mark as ${doc.title}
-                    </button>
+                    </button> -->
                 `;
                 documentList.appendChild(li);
+                
             });
         })
         .catch(error => console.error('Fehler beim Abrufen der Documents:', error));
@@ -108,6 +117,23 @@ function toggleComplete(id, isComplete, name) {
         .catch(error => console.error('Fehler:', error));
 }
 
+function showAddDocument(){
+    const a = document.getElementById("main")
+    a.classList.add("d-none")
+    document.getElementById("add").classList.remove("d-none")
+}
+
+function showMain(){
+    const a = document.getElementById("add")
+    a.classList.add("d-none")
+    document.getElementById("main").classList.remove("d-none")
+    fetchDocuments()
+}
 
 // Load document items on page load
-document.addEventListener('DOMContentLoaded', fetchDocuments);
+document.addEventListener('DOMContentLoaded', (event) => {
+    fetchDocuments();
+    document.getElementById("searchDocument").addEventListener("submit", function (e) {
+        e.preventDefault();
+    })
+});
