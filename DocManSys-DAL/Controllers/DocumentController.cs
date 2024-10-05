@@ -8,8 +8,15 @@ namespace DocManSys_DAL.Controllers {
     [ApiController]
     public class DocumentController(IDocumentRepository documentRepository) : ControllerBase {
         [HttpGet]
-        public async Task<IEnumerable<Document>> GetAllDocuments() {
-            return await documentRepository.GetAllDocumentsAsync();
+        public async Task<IEnumerable<Document>> GetAllDocuments([FromQuery] string searchTerm = "") {
+            var documents = await documentRepository.GetAllDocumentsAsync();
+            if (!string.IsNullOrEmpty(searchTerm)) {
+                documents = documents.Where(doc => 
+                    doc.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    doc.Author.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return documents.Reverse();
         }
 
         [HttpGet("{id}")]

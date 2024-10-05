@@ -27,10 +27,15 @@ namespace DocManSys_RestAPI.Controllers
         /// </summary>
         /// <returns>IEnumerable<Document></Document>></returns>
         [HttpGet]
-        public async Task<IActionResult> GetDocuments() {
+        public async Task<IActionResult> GetDocuments([FromQuery] string searchTerm = "") {
             var client = _clientFactory.CreateClient("DocManSys-DAL");
-            var response = await client.GetAsync("/api/document");
-
+            
+            string requestUri = "/api/document";
+            if (!string.IsNullOrEmpty(searchTerm)) {
+                requestUri += $"?searchTerm={Uri.EscapeDataString(searchTerm)}"; // URL encode the search term
+            }
+            
+            var response = await client.GetAsync(requestUri);
             if (response.IsSuccessStatusCode) {
                 var items = await response.Content.ReadFromJsonAsync<IEnumerable<Document>>();
                 return Ok(items);
@@ -92,9 +97,9 @@ namespace DocManSys_RestAPI.Controllers
             var client = _clientFactory.CreateClient("DocManSys-DAL");
             var response = await client.PostAsJsonAsync("/api/document", document);
             if (response.IsSuccessStatusCode) {
-                var item = await response.Content.ReadFromJsonAsync<Document>();
-                if (item != null)
-                    return CreatedAtAction(nameof(GetDocument), new { id = item.Id }, item);
+                //var item = await response.Content.ReadFromJsonAsync<Document>();
+                //if (item != null)
+                    return CreatedAtAction(nameof(GetDocument), new { id = document.Id }, document);
             }
 
             return StatusCode((int)response.StatusCode, "Error creating Document in DAL");
@@ -115,5 +120,7 @@ namespace DocManSys_RestAPI.Controllers
             }
             return StatusCode((int)response.StatusCode, "Error deleting Document in DAL");
         }
+        
+        
     }
 }

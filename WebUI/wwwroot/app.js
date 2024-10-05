@@ -1,5 +1,24 @@
 const apiUrl = 'http://localhost:8081/api/document';
 
+function fillCard(doc){
+    return `<div class="card m-2">
+                <img src="${doc.image}" class="card-img-top" alt="${doc.title}" style="width: 150px; height: 150px">
+                <div class="card-body bg-light">
+                    <p class="m-0 " style="font-size: 12px">Title: ${doc.title}</p>
+                    <p class="m-0" style="font-size: 12px">Author: ${doc.author}</p>
+                    <button onclick="showDetails(${doc.id})" class="btn btn-primary mt-1 p-1" style="font-size: 12px">Details</button>
+                    <button onclick="deleteDocument(${doc.id})" class="btn btn-danger mt-1 p-1" style="font-size: 12px">Delete</button>
+                    <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
+                </div>
+            </div>`
+    
+    /*<span>Document: ${doc.id} | Title: ${doc.title}</span>
+        <button class="btn btn-danger ms-2" onclick="deleteDocument(${doc.id})">Delete</button>
+        <button class="btn btn-primary ms-2" onclick="toggleComplete(${doc.id}, ${doc.title}, '${doc.title}')">
+            Mark as ${doc.title}
+        </button> */
+}
+
 // Function to fetch and display Documents 
 function fetchDocuments() {
     console.log('Fetching Documents items...');
@@ -9,29 +28,11 @@ function fetchDocuments() {
         )
         .then(data => {
             const documentList = document.getElementById('documentList');
-            console.log(data)
             documentList.innerHTML = ''; // Clear the list before appending new items
             data.forEach(doc => {
-                console.log(doc)
-                // Create list item with delete and toggle complete buttons
                 const li = document.createElement('li');
-                li.innerHTML = `
-                    <div class="card w-25 ">
-                        <img src="${doc.image}" class="card-img-top" alt="${doc.title}">
-                        <div class="card-body">
-                            <h5 class="card-title">${doc.title}</h5>
-                            <p class="card-text">Written by the Author: ${doc.author}</p>
-                            <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
-                        </div>
-                    </div>
-                    <!--<span>Document: ${doc.id} | Title: ${doc.title}</span>
-                    <button class="btn btn-danger ms-2" onclick="deleteDocument(${doc.id})">Delete</button>
-                    <button class="btn btn-primary ms-2" onclick="toggleComplete(${doc.id}, ${doc.title}, '${doc.title}')">
-                        Mark as ${doc.title}
-                    </button> -->
-                `;
+                li.innerHTML = fillCard(doc);
                 documentList.appendChild(li);
-                
             });
         })
         .catch(error => console.error('Fehler beim Abrufen der Documents:', error));
@@ -39,18 +40,33 @@ function fetchDocuments() {
 
 // Function to add a new Document
 function addDocument() {
-    const documentName = document.getElementById('DocumentName').value;
-    const isComplete = document.getElementById('isComplete').checked;
+    const title = document.getElementById('documentTitle').value;
+    const author = document.getElementById('documentAuthor').value;
+    const errorAutor = document.getElementById("errorAuthor");
+    const errorTitle = document.getElementById("errorTitle");
 
-    if (documentName.trim() === '') {
-        alert('Please enter a Document name');
+    if (author.trim() === '' ) {
+        errorAutor.innerHTML = "Please enter a Document Author";
         return;
     }
-
+    
+    if (title.trim() === '' ) {
+        errorTitle.innerHTML = "Please enter a Document title";
+        return;
+    }
+    
+    errorTitle.innerHTML = ""
+    errorAutor.innerHTML = ""
+    author.value = ""
+    title.value = ""
+    
     const newDocument = {
-        name: documentName,
-        isComplete: isComplete
+        author: author,
+        title: title,
+        image: "Images/default_pdf.png"
     };
+    
+    console.log(JSON.stringify(newDocument))
 
     fetch(apiUrl, {
         method: 'POST',
@@ -60,10 +76,10 @@ function addDocument() {
         body: JSON.stringify(newDocument)
     })
         .then(response => {
+            console.log(response)
             if (response.ok) {
+                window.location.href = "index.html"
                 fetchDocuments(); // Refresh the list after adding
-                document.getElementById('DocumentName').value = ''; // Clear the input field
-                document.getElementById('isComplete').checked = false; // Reset checkbox
             } else {
                 // Neues Handling für den Fall eines Fehlers (z.B. leeres Namensfeld)
                 response.json().then(err => alert("Fehler: " + err.message));
@@ -117,6 +133,41 @@ function toggleComplete(id, isComplete, name) {
         .catch(error => console.error('Fehler:', error));
 }
 
+function searchDocument(){
+    let text = document.getElementById("searchDoc").value;
+    if(text === ""){
+        fetchDocuments()
+        return;
+    }
+    const searchUrl = `${apiUrl}?searchTerm=${encodeURIComponent(text)}`;
+    
+    fetch(searchUrl)
+        .then(response =>
+            response.json()
+        )
+        .then(data => {
+            const documentList = document.getElementById('documentList');
+            documentList.innerHTML = '';
+            if(data.length === 0){
+                const li = document.createElement('li');
+                li.innerHTML = `<div class="h5">No Documents Found</div>`
+                documentList.appendChild(li)
+                return
+            }
+            data.forEach(doc => {
+                const li = document.createElement('li');
+                li.innerHTML = fillCard(doc);
+                documentList.appendChild(li);
+            });
+        })
+        .catch(error => console.error('Searching not working', error));
+    
+}
+
+function showDetails(id){
+    console.log(id)
+}
+
 function showAddDocument(){
     const a = document.getElementById("main")
     a.classList.add("d-none")
@@ -124,16 +175,20 @@ function showAddDocument(){
 }
 
 function showMain(){
-    const a = document.getElementById("add")
-    a.classList.add("d-none")
-    document.getElementById("main").classList.remove("d-none")
-    fetchDocuments()
+    const a = document.getElementById("add");
+    a.classList.add("d-none");
+    document.getElementById("searchDoc").value = '';
+    document.getElementById("main").classList.remove("d-none");
+    fetchDocuments();
 }
 
 // Load document items on page load
 document.addEventListener('DOMContentLoaded', (event) => {
-    fetchDocuments();
-    document.getElementById("searchDocument").addEventListener("submit", function (e) {
+    let index = window.location.pathname;
+    if(index.endsWith("index.html")){
+        fetchDocuments();
+    }
+    /*document.getElementById("searchDocument").addEventListener("submit", function (e) {
         e.preventDefault();
-    })
+    })*/
 });
