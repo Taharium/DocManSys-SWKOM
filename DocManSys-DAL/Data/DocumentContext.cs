@@ -24,6 +24,21 @@ namespace DocManSys_DAL.Data {
             });
 
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Document>().HasData(
+                new Document {
+                    Id = 1,
+                    Title = "Sample Document 1",
+                    Author = "Author A",
+                    Image = "Images/default_pdf.png"
+                },
+                new Document {
+                    Id = 2,
+                    Title = "Sample Document 2",
+                    Author = "Author B",
+                    Image = "Images/default_pdf.png"
+                }
+            );
         }
     }
 }

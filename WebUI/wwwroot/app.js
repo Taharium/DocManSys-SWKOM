@@ -21,21 +21,34 @@ function fillCard(doc){
 
 // Function to fetch and display Documents 
 function fetchDocuments() {
+    const throbber = document.getElementById('throbber');
+    throbber.style.display = 'block';
+
     console.log('Fetching Documents items...');
     fetch(apiUrl)
-        .then(response => 
+        .then(response =>
             response.json()
         )
         .then(data => {
             const documentList = document.getElementById('documentList');
+            throbber.style.display = 'none';
             documentList.innerHTML = ''; // Clear the list before appending new items
+            if (data.length === 0) {
+                const li = document.createElement('li');
+                li.innerHTML = "No Documents";
+                documentList.appendChild(li);
+            }
+
             data.forEach(doc => {
                 const li = document.createElement('li');
                 li.innerHTML = fillCard(doc);
                 documentList.appendChild(li);
             });
         })
-        .catch(error => console.error('Fehler beim Abrufen der Documents:', error));
+        .catch(error => {
+            throbber.style.display = 'none';
+            console.error('Fehler beim Abrufen der Documents:', error)
+        });
 }
 
 // Function to add a new Document
