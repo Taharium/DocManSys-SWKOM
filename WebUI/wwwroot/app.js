@@ -45,27 +45,31 @@ function addDocument() {
     const errorAutor = document.getElementById("errorAuthor");
     const errorTitle = document.getElementById("errorTitle");
 
-    if (author.trim() === '' ) {
+    let isValid = true
+    if (author.trim() === '') {
         errorAutor.innerHTML = "Please enter a Document Author";
+        isValid = false
+    } else {
+        errorAutor.innerHTML = ""
+    }
+
+    if (title.trim() === '') {
+        errorTitle.innerHTML = "Please enter a Document Title";
+        isValid = false
+    } else {
+        errorTitle.innerHTML = ""
+    }
+
+    if (!isValid) {
         return;
     }
-    
-    if (title.trim() === '' ) {
-        errorTitle.innerHTML = "Please enter a Document title";
-        return;
-    }
-    
-    errorTitle.innerHTML = ""
-    errorAutor.innerHTML = ""
-    author.value = ""
-    title.value = ""
-    
+
     const newDocument = {
         author: author,
         title: title,
         image: "Images/default_pdf.png"
     };
-    
+
     console.log(JSON.stringify(newDocument))
 
     fetch(apiUrl, {
@@ -78,6 +82,8 @@ function addDocument() {
         .then(response => {
             console.log(response)
             if (response.ok) {
+                author.value = ""
+                title.value = ""
                 window.location.href = "index.html"
                 fetchDocuments(); // Refresh the list after adding
             } else {
@@ -88,7 +94,6 @@ function addDocument() {
         })
         .catch(error => console.error('Fehler:', error));
 }
-
 
 // Function to delete a Document
 function deleteDocument(id) {
