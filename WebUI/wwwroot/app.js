@@ -22,7 +22,7 @@ function fillCard(doc){
 // Function to fetch and display Documents 
 function fetchDocuments() {
     const throbber = document.getElementById('throbber');
-    //throbber.style.display = 'block';
+    throbber.style.display = 'block';
 
     console.log('Fetching Documents items...');
     fetch(apiUrl)
@@ -31,7 +31,7 @@ function fetchDocuments() {
         )
         .then(data => {
             const documentList = document.getElementById('documentList');
-            //throbber.style.display = 'none';
+            throbber.style.display = 'none';
             documentList.innerHTML = ''; // Clear the list before appending new items
             if (data.length === 0) {
                 const li = document.createElement('li');
@@ -46,7 +46,7 @@ function fetchDocuments() {
             });
         })
         .catch(error => {
-            //throbber.style.display = 'none';
+            throbber.style.display = 'none';
             console.error('Fehler beim Abrufen der Documents:', error)
         });
 }

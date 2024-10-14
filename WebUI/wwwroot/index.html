@@ -46,9 +46,11 @@
     <div class=" m-2 d-flex align-self-center justify-content-center col-xl-8 col-lg-9 col-12">
         <input id="searchDoc" onkeyup="searchDocument()" class=" shadow-sm form-control " type="search" placeholder="Search" aria-label="Search">
     </div>
-    <div id="documentList" class="shadow-sm overflow-y-auto bg-white border rounded p-3 d-flex flex-wrap noBulletPoints">
+    <div id="container" class="shadow-sm bg-white border rounded p-3 flex-wrap noBulletPoints">
+        <div id="documentList" class="noBulletPoints overflow-y-auto d-flex flex-wrap"></div>
+        <div id="throbber"></div>
     </div>
-    <!--<div id="throbber"></div>-->
+    <!---->
 </div>
 
     <!--Add content
