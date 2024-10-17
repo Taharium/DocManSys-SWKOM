@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using DocManSys_RestAPI.Models;
+using AutoMapper;
 
 namespace DocManSys_RestAPI.Controllers
 {
@@ -17,10 +12,12 @@ namespace DocManSys_RestAPI.Controllers
     public class DocumentController : ControllerBase {
         private readonly IHttpClientFactory _clientFactory;
         private readonly ILogger<DocumentController> _logger;
+        private readonly IMapper _mapper;
 
-        public DocumentController(IHttpClientFactory clientFactory, ILogger<DocumentController> logger) {
+        public DocumentController(IHttpClientFactory clientFactory, ILogger<DocumentController> logger, IMapper mapper) {
             _logger = logger;
             _clientFactory = clientFactory;
+            _mapper = mapper;
         }
 
         // GET: api/Document
@@ -39,8 +36,9 @@ namespace DocManSys_RestAPI.Controllers
             
             var response = await client.GetAsync(requestUri);
             if (response.IsSuccessStatusCode) {
-                var items = await response.Content.ReadFromJsonAsync<IEnumerable<Document>>();
-                return Ok(items);
+                var items = await response.Content.ReadFromJsonAsync<IEnumerable<DocManSys_DAL.Entities.Document>>();
+                var documents = _mapper.Map<IEnumerable<Document>>(items);
+                return Ok(documents);
             }
             
             //_logger.LogError();
@@ -59,8 +57,9 @@ namespace DocManSys_RestAPI.Controllers
             var client = _clientFactory.CreateClient("DocManSys-DAL");
             var response = await client.GetAsync($"/api/document/{id}");
             if (response.IsSuccessStatusCode) {
-                var item = await response.Content.ReadFromJsonAsync<Document>();
-                if (item != null) return Ok(item);
+                var item = await response.Content.ReadFromJsonAsync<DocManSys_DAL.Entities.Document>();
+                var document = _mapper.Map<Document>(item);
+                if (item != null) return Ok(document);
                 return NotFound();
             }
 
@@ -80,7 +79,8 @@ namespace DocManSys_RestAPI.Controllers
             if (id != document.Id) return BadRequest();
 
             var client = _clientFactory.CreateClient("DocManSys-DAL");
-            var response = await client.PutAsJsonAsync($"/api/document/{id}", document);
+            var item = _mapper.Map<DocManSys_DAL.Entities.Document>(document);
+            var response = await client.PutAsJsonAsync($"/api/document/{id}", item);
             if (response.IsSuccessStatusCode) {
                 return NoContent();
             }
@@ -98,11 +98,12 @@ namespace DocManSys_RestAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> PostDocument(Document document) {
             var client = _clientFactory.CreateClient("DocManSys-DAL");
-            var response = await client.PostAsJsonAsync("/api/document", document);
+            var item = _mapper.Map<DocManSys_DAL.Entities.Document>(document);
+            var response = await client.PostAsJsonAsync("/api/document", item);
             if (response.IsSuccessStatusCode) {
                 //var item = await response.Content.ReadFromJsonAsync<Document>();
                 //if (item != null)
-                    return CreatedAtAction(nameof(GetDocument), new { id = document.Id }, document);
+                    return CreatedAtAction(nameof(GetDocument), new { id = item.Id }, item);
             }
 
             return StatusCode((int)response.StatusCode, "Error creating Document in DAL");

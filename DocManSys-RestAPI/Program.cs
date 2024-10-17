@@ -1,4 +1,5 @@
 
+using DocManSys_RestAPI.Mappings;
 using DocManSys_RestAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using PaperlessRest.Log4Net;
@@ -26,6 +27,8 @@ namespace DocManSys_RestAPI {
             // Add services to the container.
 
             builder.Services.AddControllers();
+
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -55,7 +58,6 @@ namespace DocManSys_RestAPI {
             
             //app.Urls.Add("http://*:8081");
             app.UseAuthorization();
-
 
             app.MapControllers();
 

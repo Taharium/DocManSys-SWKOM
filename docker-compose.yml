@@ -27,8 +27,8 @@ services:
   docmansys-dal:
     image: docmansys-dal_image
     build:
-      context: ./DocManSys-DAL
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./DocManSys-DAL/Dockerfile
     ports:
       - "8082:8082"
     environment:
