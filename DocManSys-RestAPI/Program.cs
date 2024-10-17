@@ -1,11 +1,14 @@
 
 using DocManSys_RestAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using PaperlessRest.Log4Net;
 
 namespace DocManSys_RestAPI {
     public class Program {
         public static void Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Logging.ClearProviders();
+            builder.Logging.AddProvider(new Log4NetProvider());
 
             // CORS konfigurieren, um Anfragen von localhost:80 (WebUI) zuzulassen
             builder.Services.AddCors(options =>

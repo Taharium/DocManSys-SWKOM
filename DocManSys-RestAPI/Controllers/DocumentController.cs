@@ -16,8 +16,10 @@ namespace DocManSys_RestAPI.Controllers
     [Route("api/[controller]")]
     public class DocumentController : ControllerBase {
         private readonly IHttpClientFactory _clientFactory;
+        private readonly ILogger<DocumentController> _logger;
 
-        public DocumentController(IHttpClientFactory clientFactory) {
+        public DocumentController(IHttpClientFactory clientFactory, ILogger<DocumentController> logger) {
+            _logger = logger;
             _clientFactory = clientFactory;
         }
 
@@ -40,7 +42,8 @@ namespace DocManSys_RestAPI.Controllers
                 var items = await response.Content.ReadFromJsonAsync<IEnumerable<Document>>();
                 return Ok(items);
             }
-
+            
+            //_logger.LogError();
             return StatusCode((int)response.StatusCode, "Error retrieving Documents from DAL");
 
         }
