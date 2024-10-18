@@ -1,14 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
 using DocManSys_RestAPI.Models;
 using AutoMapper;
+using DocManSys_DAL.Entities;
 
 namespace DocManSys_RestAPI.Controllers
 {
     /// <summary>
     /// Document Controller with GET, PUT, POST, DELETE methods
     /// </summary>
+    [Area("RestAPI")]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[area]/[controller]")]
     public class DocumentController : ControllerBase {
         private readonly IHttpClientFactory _clientFactory;
         private readonly ILogger<DocumentController> _logger;
@@ -28,15 +30,14 @@ namespace DocManSys_RestAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetDocuments([FromQuery] string searchTerm = "") {
             var client = _clientFactory.CreateClient("DocManSys-DAL");
-            
-            string requestUri = "/api/document";
+            string requestUri = "api/DAL/document";
             if (!string.IsNullOrEmpty(searchTerm)) {
                 requestUri += $"?searchTerm={Uri.EscapeDataString(searchTerm)}"; // URL encode the search term
             }
             
             var response = await client.GetAsync(requestUri);
             if (response.IsSuccessStatusCode) {
-                var items = await response.Content.ReadFromJsonAsync<IEnumerable<DocManSys_DAL.Entities.Document>>();
+                var items = await response.Content.ReadFromJsonAsync<IEnumerable<DocumentEntity>>();
                 var documents = _mapper.Map<IEnumerable<Document>>(items);
                 return Ok(documents);
             }
@@ -55,9 +56,9 @@ namespace DocManSys_RestAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDocument(int id) {
             var client = _clientFactory.CreateClient("DocManSys-DAL");
-            var response = await client.GetAsync($"/api/document/{id}");
+            var response = await client.GetAsync($"api/DAL/document/{id}");
             if (response.IsSuccessStatusCode) {
-                var item = await response.Content.ReadFromJsonAsync<DocManSys_DAL.Entities.Document>();
+                var item = await response.Content.ReadFromJsonAsync<DocumentEntity>();
                 var document = _mapper.Map<Document>(item);
                 if (item != null) return Ok(document);
                 return NotFound();
@@ -79,8 +80,8 @@ namespace DocManSys_RestAPI.Controllers
             if (id != document.Id) return BadRequest();
 
             var client = _clientFactory.CreateClient("DocManSys-DAL");
-            var item = _mapper.Map<DocManSys_DAL.Entities.Document>(document);
-            var response = await client.PutAsJsonAsync($"/api/document/{id}", item);
+            var item = _mapper.Map<DocumentEntity>(document);
+            var response = await client.PutAsJsonAsync($"api/DAL/document/{id}", item);
             if (response.IsSuccessStatusCode) {
                 return NoContent();
             }
@@ -98,8 +99,8 @@ namespace DocManSys_RestAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> PostDocument(Document document) {
             var client = _clientFactory.CreateClient("DocManSys-DAL");
-            var item = _mapper.Map<DocManSys_DAL.Entities.Document>(document);
-            var response = await client.PostAsJsonAsync("/api/document", item);
+            var item = _mapper.Map<DocumentEntity>(document);
+            var response = await client.PostAsJsonAsync("api/DAL/document", item);
             if (response.IsSuccessStatusCode) {
                 //var item = await response.Content.ReadFromJsonAsync<Document>();
                 //if (item != null)
@@ -118,7 +119,7 @@ namespace DocManSys_RestAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDocument(int id) {
             var client = _clientFactory.CreateClient("DocManSys-DAL");
-            var response = await client.DeleteAsync($"/api/document/{id}");
+            var response = await client.DeleteAsync($"api/DAL/document/{id}");
             if (response.IsSuccessStatusCode) {
                 return NoContent();
             }

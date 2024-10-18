@@ -1,5 +1,5 @@
 ﻿namespace DocManSys_DAL.Entities {
-    public class Document {
+    public class DocumentEntity {
         public int Id { get; set; }
         public string Title { get; set; } = "";
 

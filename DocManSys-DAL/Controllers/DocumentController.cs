@@ -4,11 +4,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DocManSys_DAL.Controllers {
-    [Route("api/[controller]")]
+    [Area("DAL")]
+    [Route("api/[area]/[controller]")]
     [ApiController]
     public class DocumentController(IDocumentRepository documentRepository) : ControllerBase {
         [HttpGet]
-        public async Task<IEnumerable<Document>> GetAllDocuments([FromQuery] string searchTerm = "") {
+        public async Task<IEnumerable<DocumentEntity>> GetAllDocuments([FromQuery] string searchTerm = "") {
             var documents = await documentRepository.GetAllDocumentsAsync();
             if (!string.IsNullOrEmpty(searchTerm)) {
                 documents = documents.Where(doc => 
@@ -20,28 +21,28 @@ namespace DocManSys_DAL.Controllers {
         }
 
         [HttpGet("{id}")]
-        public async Task<Document?> GetDocumentById(int id) {
+        public async Task<DocumentEntity?> GetDocumentById(int id) {
             return await documentRepository.GetDocumentByIdAsync(id);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddDocument(Document document) {
-            if(string.IsNullOrEmpty(document.Title)) {
+        public async Task<IActionResult> AddDocument(DocumentEntity documentEntity) {
+            if(string.IsNullOrEmpty(documentEntity.Title)) {
                 return BadRequest(new {message = "Title is required"});
             }
 
-            await documentRepository.AddDocumentAsync(document);
+            await documentRepository.AddDocumentAsync(documentEntity);
             return Ok();
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateDocument(Document document) {
-            var item = await documentRepository.GetDocumentByIdAsync(document.Id);
+        public async Task<IActionResult> UpdateDocument(DocumentEntity documentEntity) {
+            var item = await documentRepository.GetDocumentByIdAsync(documentEntity.Id);
             if (item == null) {
                 return NotFound();
             }
 
-            item.Title = document.Title;
+            item.Title = documentEntity.Title;
             await documentRepository.UpdateDocumentAsync(item);
             return Ok();
         }

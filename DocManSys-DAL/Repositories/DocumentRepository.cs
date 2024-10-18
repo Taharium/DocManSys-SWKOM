@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DocManSys_DAL.Repositories {
     public class DocumentRepository(DocumentContext context) : IDocumentRepository {
-        public async Task<IEnumerable<Document>> GetAllDocumentsAsync() {
+        public async Task<IEnumerable<DocumentEntity>> GetAllDocumentsAsync() {
             return await context.Documents.ToListAsync();
         }
-        public async Task<Document?> GetDocumentByIdAsync(int id) {
+        public async Task<DocumentEntity?> GetDocumentByIdAsync(int id) {
             return await context.Documents.FindAsync(id);
         }
 
-        public async Task AddDocumentAsync(Document document) {
-            await context.Documents.AddAsync(document);
+        public async Task AddDocumentAsync(DocumentEntity documentEntity) {
+            await context.Documents.AddAsync(documentEntity);
             await context.SaveChangesAsync();
         }
         public async Task DeleteDocumentAsync(int id) {
@@ -23,8 +23,8 @@ namespace DocManSys_DAL.Repositories {
             }
         }
 
-        public async Task UpdateDocumentAsync(Document document) {
-            context.Documents.Update(document);
+        public async Task UpdateDocumentAsync(DocumentEntity documentEntity) {
+            context.Documents.Update(documentEntity);
             await context.SaveChangesAsync();
         }
     }

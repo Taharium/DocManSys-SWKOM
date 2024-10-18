@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DocManSys_DAL.Data {
     public sealed class DocumentContext(DbContextOptions<DocumentContext> options) : DbContext(options) {
-        public DbSet<Document> Documents { get; set; }
+        public DbSet<DocumentEntity> Documents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             // Manuelle Konfiguration der Tabelle
-            modelBuilder.Entity<Document>(entity => {
+            modelBuilder.Entity<DocumentEntity>(entity => {
                 entity.ToTable("Documents");  // Setzt den Tabellennamen
 
                 entity.HasKey(e => e.Id);  // Setzt den Primärschlüssel
@@ -25,14 +25,14 @@ namespace DocManSys_DAL.Data {
 
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Document>().HasData(
-                new Document {
+            modelBuilder.Entity<DocumentEntity>().HasData(
+                new DocumentEntity {
                     Id = 1,
                     Title = "Sample Document 1",
                     Author = "Author A",
                     Image = "Images/default_pdf.png"
                 },
-                new Document {
+                new DocumentEntity {
                     Id = 2,
                     Title = "Sample Document 2",
                     Author = "Author B",

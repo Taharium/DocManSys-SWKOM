@@ -1,4 +1,4 @@
-const apiUrl = 'http://localhost:8081/api/document';
+const apiUrl = 'http://localhost:8081/api/RestAPI/document';
 
 function fillCard(doc){
     return `<div class="card m-2">
@@ -98,7 +98,7 @@ function addDocument() {
                 author.value = ""
                 title.value = ""
                 window.location.href = "index.html"
-                fetchDocuments(); // Refresh the list after adding
+                //fetchDocuments(); // Refresh the list after adding
             } else {
                 // Neues Handling für den Fall eines Fehlers (z.B. leeres Namensfeld)
                 response.json().then(err => alert("Fehler: " + err.message));
