@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using DocManSys_DAL.Entities;
+﻿using DocManSys_DAL.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DocManSys_DAL.Data {

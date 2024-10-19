@@ -6,17 +6,11 @@ function fillCard(doc){
                 <div class="card-body bg-light">
                     <p class="m-0 " style="font-size: 12px">Title: ${doc.title}</p>
                     <p class="m-0" style="font-size: 12px">Author: ${doc.author}</p>
-                    <button onclick="showDetails(${doc.id})" class="btn btn-primary mt-1 p-1" style="font-size: 12px">Details</button>
+                    <button onclick="showUpdate(decodeURIComponent('${encodeURIComponent(JSON.stringify(doc))}'))" class="btn btn-primary mt-1 p-1" style="font-size: 12px">Update</button>
                     <button onclick="deleteDocument(${doc.id})" class="btn btn-danger mt-1 p-1" style="font-size: 12px">Delete</button>
                     <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
                 </div>
             </div>`
-    
-    /*<span>Document: ${doc.id} | Title: ${doc.title}</span>
-        <button class="btn btn-danger ms-2" onclick="deleteDocument(${doc.id})">Delete</button>
-        <button class="btn btn-primary ms-2" onclick="toggleComplete(${doc.id}, ${doc.title}, '${doc.title}')">
-            Mark as ${doc.title}
-        </button> */
 }
 
 // Function to fetch and display Documents 
@@ -55,7 +49,8 @@ function fetchDocuments() {
 function addDocument() {
     const title = document.getElementById('documentTitle').value;
     const author = document.getElementById('documentAuthor').value;
-    const errorAutor = document.getElementById("errorAuthor");
+    const errorDiv = document.getElementById('errorDiv');
+    /*const errorAutor = document.getElementById("errorAuthor");
     const errorTitle = document.getElementById("errorTitle");
 
     let isValid = true
@@ -75,7 +70,7 @@ function addDocument() {
 
     if (!isValid) {
         return;
-    }
+    }*/
 
     const newDocument = {
         author: author,
@@ -97,12 +92,14 @@ function addDocument() {
             if (response.ok) {
                 author.value = ""
                 title.value = ""
+                errorDiv.innerHTML = "";
                 window.location.href = "index.html"
                 //fetchDocuments(); // Refresh the list after adding
             } else {
                 // Neues Handling für den Fall eines Fehlers (z.B. leeres Namensfeld)
-                response.json().then(err => alert("Fehler: " + err.message));
-                console.error('Fehler beim Hinzufügen der Aufgabe.');
+                response.json().then(err => {
+                    errorDiv.innerHTML = `<ul>` + Object.values(err.errors).map(e => `<li>${e}</li>`).join('') + `</ul>`
+                });
             }
         })
         .catch(error => console.error('Fehler:', error));
@@ -124,6 +121,7 @@ function deleteDocument(id) {
 }
 
 // Function to toggle complete status
+/*
 function toggleComplete(id, isComplete, name) {
     // Aufgabe mit umgekehrtem isComplete-Status aktualisieren
     const updatedDocument = {
@@ -150,6 +148,7 @@ function toggleComplete(id, isComplete, name) {
         })
         .catch(error => console.error('Fehler:', error));
 }
+*/
 
 function searchDocument(){
     let text = document.getElementById("searchDoc").value;
@@ -182,11 +181,12 @@ function searchDocument(){
     
 }
 
-function showDetails(id){
-    console.log(id)
+function showUpdate(doc) {
+    doc = JSON.parse(doc)
+    console.log(doc)
 }
 
-function showAddDocument(){
+/*function showAddDocument(){
     const a = document.getElementById("main")
     a.classList.add("d-none")
     document.getElementById("add").classList.remove("d-none")
@@ -198,7 +198,7 @@ function showMain(){
     document.getElementById("searchDoc").value = '';
     document.getElementById("main").classList.remove("d-none");
     fetchDocuments();
-}
+}*/
 
 // Load document items on page load
 document.addEventListener('DOMContentLoaded', (event) => {

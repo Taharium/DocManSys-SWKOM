@@ -1,6 +1,5 @@
 ﻿using DocManSys_DAL.Entities;
 using DocManSys_DAL.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DocManSys_DAL.Controllers {

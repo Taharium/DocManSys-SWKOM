@@ -42,14 +42,12 @@
             <div class="mb-3">
                 <label for="documentAuthor" class="form-label">Author</label>
                 <input type="text" class="form-control" id="documentAuthor" placeholder="Enter author's name" required>
-                <p id="errorAuthor" class="redError"></p>
             </div>
 
             <!-- Title Field -->
             <div class="mb-3">
                 <label for="documentTitle" class="form-label">Title</label>
                 <input type="text" class="form-control" id="documentTitle" placeholder="Enter document title" required>
-                <p id="errorTitle" class=" redError"></p>
             </div>
 
             <!-- Image Field -->
@@ -62,6 +60,7 @@
             <div class="d-grid">
                 <button onclick="addDocument()" class="btn btn-primary">Submit Document</button>
             </div>
+            <div id="errorDiv" class="redError"></div>
         </div>
     </div>
 

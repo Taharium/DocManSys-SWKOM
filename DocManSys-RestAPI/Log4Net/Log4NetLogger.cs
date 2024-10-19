@@ -2,7 +2,7 @@
 using log4net;
 using log4net.Config;
 
-namespace PaperlessRest.Log4Net;
+namespace DocManSys_RestAPI.Log4Net;
 
 public class Log4NetLogger : ILogger
 {
@@ -10,7 +10,7 @@ public class Log4NetLogger : ILogger
 
     public Log4NetLogger(string name, FileInfo fileInfo)
     {
-        var loggerRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+        var loggerRepository = LogManager.GetRepository(Assembly.GetEntryAssembly()!);
         _log = LogManager.GetLogger(loggerRepository.Name, name);
 
         XmlConfigurator.Configure(loggerRepository, fileInfo);

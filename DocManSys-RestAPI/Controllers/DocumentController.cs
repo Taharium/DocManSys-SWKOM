@@ -29,6 +29,9 @@ namespace DocManSys_RestAPI.Controllers
         /// <returns>IEnumerable<Document></Document>></returns>
         [HttpGet]
         public async Task<IActionResult> GetDocuments([FromQuery] string searchTerm = "") {
+            
+            _logger.LogInformation("TEST");
+            
             var client = _clientFactory.CreateClient("DocManSys-DAL");
             string requestUri = "api/DAL/document";
             if (!string.IsNullOrEmpty(searchTerm)) {
@@ -42,7 +45,7 @@ namespace DocManSys_RestAPI.Controllers
                 return Ok(documents);
             }
             
-            //_logger.LogError();
+            _logger.LogError("Failed to retrieve Documents from Database!");
             return StatusCode((int)response.StatusCode, "Error retrieving Documents from DAL");
 
         }
@@ -63,7 +66,7 @@ namespace DocManSys_RestAPI.Controllers
                 if (item != null) return Ok(document);
                 return NotFound();
             }
-
+            _logger.LogError($"Failed to retrieve Document from Database with the ID {id}");
             return StatusCode((int)response.StatusCode, "Error retrieving Document from DAL");
         }
 
@@ -85,7 +88,7 @@ namespace DocManSys_RestAPI.Controllers
             if (response.IsSuccessStatusCode) {
                 return NoContent();
             }
-
+            _logger.LogError($"Failed to update Document from Database with the ID {id}");
             return StatusCode((int)response.StatusCode, "Error updating Document in DAL");
         }
 
@@ -106,7 +109,8 @@ namespace DocManSys_RestAPI.Controllers
                 //if (item != null)
                     return CreatedAtAction(nameof(GetDocument), new { id = item.Id }, item);
             }
-
+            
+            _logger.LogError($"Failed to write new Document into Database with the Document Title: {document.Title} and Author: {document.Author} ");
             return StatusCode((int)response.StatusCode, "Error creating Document in DAL");
         }
 
@@ -123,6 +127,7 @@ namespace DocManSys_RestAPI.Controllers
             if (response.IsSuccessStatusCode) {
                 return NoContent();
             }
+            _logger.LogError($"Failed to delete Document from Database with the ID {id}");
             return StatusCode((int)response.StatusCode, "Error deleting Document in DAL");
         }
         

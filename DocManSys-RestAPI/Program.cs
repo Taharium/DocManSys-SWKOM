@@ -1,15 +1,23 @@
 
+using DocManSys_RestAPI.Log4Net;
 using DocManSys_RestAPI.Mappings;
 using DocManSys_RestAPI.Models;
-using Microsoft.EntityFrameworkCore;
-using PaperlessRest.Log4Net;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+
 
 namespace DocManSys_RestAPI {
     public class Program {
         public static void Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
+            
+            //logging
             builder.Logging.ClearProviders();
             builder.Logging.AddProvider(new Log4NetProvider());
+            
+            //Fluent validation
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddValidatorsFromAssemblyContaining<DocumentValidator>();
 
             // CORS konfigurieren, um Anfragen von localhost:80 (WebUI) zuzulassen
             builder.Services.AddCors(options =>
@@ -28,6 +36,7 @@ namespace DocManSys_RestAPI {
 
             builder.Services.AddControllers();
 
+            //mapper
             builder.Services.AddAutoMapper(typeof(MappingProfile));
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

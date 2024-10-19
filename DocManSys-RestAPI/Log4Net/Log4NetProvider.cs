@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace PaperlessRest.Log4Net;
+namespace DocManSys_RestAPI.Log4Net;
 
 public class Log4NetProvider : ILoggerProvider
 {
