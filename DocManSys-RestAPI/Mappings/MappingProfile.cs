@@ -9,20 +9,20 @@ namespace DocManSys_RestAPI.Mappings {
                 .ForMember(dest => dest.Id, opt 
                     => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Title, opt 
-                    => opt.MapFrom(src => $"*{src.Title ?? string.Empty}*"))
+                    => opt.MapFrom(src => $"{src.Title ?? string.Empty}"))
                 .ForMember(dest => dest.Author, opt
-                    => opt.MapFrom(src => $"*{src.Author ?? string.Empty}*"))
+                    => opt.MapFrom(src => $"{src.Author ?? string.Empty}"))
                 .ForMember(dest => dest.Image, opt
-                    => opt.MapFrom(src => $"*{src.Image ?? string.Empty}*"))
+                    => opt.MapFrom(src => $"{src.Image ?? string.Empty}"))
                 .ReverseMap()
                 .ForMember(dest => dest.Id, opt
                     => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Title, opt
-                    => opt.MapFrom(src => (src.Title ?? string.Empty).Replace("*", "")))
+                    => opt.MapFrom(src => (src.Title ?? string.Empty)))
                 .ForMember(dest => dest.Author, opt
-                    => opt.MapFrom(src => (src.Author ?? string.Empty).Replace("*", "")))
+                    => opt.MapFrom(src => (src.Author ?? string.Empty)))
                 .ForMember(dest => dest.Image, opt
-                    => opt.MapFrom(src => (src.Image ?? string.Empty).Replace("*", "")));
+                    => opt.MapFrom(src => (src.Image ?? string.Empty)));
         }
     }
 }

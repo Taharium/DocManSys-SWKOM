@@ -6,7 +6,7 @@ function fillCard(doc){
                 <div class="card-body bg-light">
                     <p class="m-0 " style="font-size: 12px">Title: ${doc.title}</p>
                     <p class="m-0" style="font-size: 12px">Author: ${doc.author}</p>
-                    <button onclick="showUpdate(decodeURIComponent('${encodeURIComponent(JSON.stringify(doc))}'))" class="btn btn-primary mt-1 p-1" style="font-size: 12px">Update</button>
+                    <button onclick="showUpdate(decodeURIComponent('${encodeURIComponent(JSON.stringify(doc))}'))" class="btn btn-primary mt-1 p-1" style="font-size: 12px">Details</button>
                     <button onclick="deleteDocument(${doc.id})" class="btn btn-danger mt-1 p-1" style="font-size: 12px">Delete</button>
                     <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
                 </div>
