@@ -10,6 +10,7 @@ services:
       - ASPNETCORE_URLS=http://+:8081
     depends_on:
       - docmansys-dal
+      - rabbitmq 
 
   webUI:
     image: docmansys-webui
@@ -23,6 +24,7 @@ services:
       - ./WebUI/wwwroot:/app/wwwroot  # Mount static files
     depends_on:
       - rest-api
+      - rabbitmq 
 
   docmansys-dal:
     image: docmansys-dal_image
@@ -63,6 +65,18 @@ services:
     networks:
       - postgres
     restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
  
 networks:
   postgres:
