@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using DocManSys_RestAPI.Models;
 using AutoMapper;
 using DocManSys_DAL.Entities;
+using RabbitMQ.Client;
+using System.Text;
 
 namespace DocManSys_RestAPI.Controllers
 {
@@ -11,15 +13,23 @@ namespace DocManSys_RestAPI.Controllers
     [Area("RestAPI")]
     [ApiController]
     [Route("api/[area]/[controller]")]
-    public class DocumentController : ControllerBase {
+    public class DocumentController : ControllerBase, IDisposable {
         private readonly IHttpClientFactory _clientFactory;
         private readonly ILogger<DocumentController> _logger;
         private readonly IMapper _mapper;
+        private readonly IConnection _connection;
+        private readonly IModel _channel;
 
         public DocumentController(IHttpClientFactory clientFactory, ILogger<DocumentController> logger, IMapper mapper) {
             _logger = logger;
             _clientFactory = clientFactory;
             _mapper = mapper;
+            var factory = new ConnectionFactory() { HostName = "rabbitmq", UserName = "user", Password = "password" };
+            _connection = factory.CreateConnection();
+            _channel = _connection.CreateModel();
+
+            _channel.QueueDeclare(queue: "filequeue", durable: false, exclusive: false, autoDelete: false, arguments: null);
+
         }
 
         // GET: api/Document
@@ -107,12 +117,18 @@ namespace DocManSys_RestAPI.Controllers
             if (response.IsSuccessStatusCode) {
                 //var item = await response.Content.ReadFromJsonAsync<Document>();
                 //if (item != null)
-                    return CreatedAtAction(nameof(GetDocument), new { id = item.Id }, item);
+                try {
+                    SendtoMessageQueue(document.Title);
+                } catch(Exception e) {
+                    return StatusCode(500, $"Fehler beim Senden der Nachricht an RabbitMQ: {e.Message}");
+                }
+                return CreatedAtAction(nameof(GetDocument), new { id = item.Id }, item);
             }
             
             _logger.LogError($"Failed to write new Document into Database with the Document Title: {document.Title} and Author: {document.Author} ");
             return StatusCode((int)response.StatusCode, "Error creating Document in DAL");
         }
+
 
         // DELETE: api/Document/5
         /// <summary>
@@ -130,7 +146,15 @@ namespace DocManSys_RestAPI.Controllers
             _logger.LogError($"Failed to delete Document from Database with the ID {id}");
             return StatusCode((int)response.StatusCode, "Error deleting Document in DAL");
         }
-        
-        
+        private void SendtoMessageQueue(string title) {
+            var body = Encoding.UTF8.GetBytes(title);
+            _channel.BasicPublish(exchange: "", routingKey: "filequeue", basicProperties: null, body: body);
+            Console.WriteLine($@"[x] Sent {title}");
+        }
+
+        public void Dispose() {
+            _channel?.Dispose();
+            _connection?.Dispose();
+        }
     }
 }
