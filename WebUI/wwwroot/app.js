@@ -1,12 +1,12 @@
 const apiUrl = 'http://localhost:8081/api/RestAPI/document';
 
-function fillCard(doc){
+function fillCard(doc){ //decodeURIComponent('${encodeURIComponent(JSON.stringify(doc))}')
     return `<div class="card m-2">
                 <img src="${doc.image}" class="card-img-top" alt="${doc.title}" style="width: 150px; height: 150px">
                 <div class="card-body bg-light">
                     <p class="m-0 " style="font-size: 12px">Title: ${doc.title}</p>
                     <p class="m-0" style="font-size: 12px">Author: ${doc.author}</p>
-                    <button onclick="showUpdate(decodeURIComponent('${encodeURIComponent(JSON.stringify(doc))}'))" class="btn btn-primary mt-1 p-1" style="font-size: 12px">Details</button>
+                    <button onclick="showUpdate(${doc.id})" class="btn btn-primary mt-1 p-1" style="font-size: 12px">Update</button> 
                     <button onclick="deleteDocument(${doc.id})" class="btn btn-danger mt-1 p-1" style="font-size: 12px">Delete</button>
                     <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
                 </div>
@@ -46,64 +46,64 @@ function fetchDocuments() {
 }
 
 // Function to add a new Document
-function addDocument() {
-    const title = document.getElementById('documentTitle').value;
-    const author = document.getElementById('documentAuthor').value;
-    const errorDiv = document.getElementById('errorDiv');
-    /*const errorAutor = document.getElementById("errorAuthor");
-    const errorTitle = document.getElementById("errorTitle");
-
-    let isValid = true
-    if (author.trim() === '') {
-        errorAutor.innerHTML = "Please enter a Document Author";
-        isValid = false
-    } else {
-        errorAutor.innerHTML = ""
-    }
-
-    if (title.trim() === '') {
-        errorTitle.innerHTML = "Please enter a Document Title";
-        isValid = false
-    } else {
-        errorTitle.innerHTML = ""
-    }
-
-    if (!isValid) {
-        return;
-    }*/
-
-    const newDocument = {
-        author: author,
-        title: title,
-        image: "Images/default_pdf.png"
-    };
-
-    console.log(JSON.stringify(newDocument))
-
-    fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newDocument)
-    })
-        .then(response => {
-            console.log(response)
-            if (response.ok) {
-                author.value = ""
-                title.value = ""
-                errorDiv.innerHTML = "";
-                window.location.href = "index.html"
-                //fetchDocuments(); // Refresh the list after adding
-            } else {
-                // Neues Handling für den Fall eines Fehlers (z.B. leeres Namensfeld)
-                response.json().then(err => {
-                    errorDiv.innerHTML = `<ul>` + Object.values(err.errors).map(e => `<li>${e}</li>`).join('') + `</ul>`
-                });
-            }
-        })
-        .catch(error => console.error('Fehler:', error));
-}
+// function addDocument() {
+//     const title = document.getElementById('documentTitle').value;
+//     const author = document.getElementById('documentAuthor').value;
+//     const errorDiv = document.getElementById('errorDiv');
+//     /*const errorAutor = document.getElementById("errorAuthor");
+//     const errorTitle = document.getElementById("errorTitle");
+//
+//     let isValid = true
+//     if (author.trim() === '') {
+//         errorAutor.innerHTML = "Please enter a Document Author";
+//         isValid = false
+//     } else {
+//         errorAutor.innerHTML = ""
+//     }
+//
+//     if (title.trim() === '') {
+//         errorTitle.innerHTML = "Please enter a Document Title";
+//         isValid = false
+//     } else {
+//         errorTitle.innerHTML = ""
+//     }
+//
+//     if (!isValid) {
+//         return;
+//     }*/
+//
+//     const newDocument = {
+//         author: author,
+//         title: title,
+//         image: "Images/default_pdf.png"
+//     };
+//
+//     console.log(JSON.stringify(newDocument))
+//
+//     fetch(apiUrl, {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify(newDocument)
+//     })
+//         .then(response => {
+//             console.log(response)
+//             if (response.ok) {
+//                 author.value = ""
+//                 title.value = ""
+//                 errorDiv.innerHTML = "";
+//                 window.location.href = "index.html"
+//                 //fetchDocuments(); // Refresh the list after adding
+//             } else {
+//                 // Neues Handling für den Fall eines Fehlers (z.B. leeres Namensfeld)
+//                 response.json().then(err => {
+//                     errorDiv.innerHTML = `<ul>` + Object.values(err.errors).map(e => `<li>${e}</li>`).join('') + `</ul>`
+//                 });
+//             }
+//         })
+//         .catch(error => console.error('Fehler:', error));
+// }
 
 // Function to delete a Document
 function deleteDocument(id) {
@@ -150,6 +150,9 @@ function toggleComplete(id, isComplete, name) {
 }
 */
 
+
+
+
 function searchDocument(){
     let text = document.getElementById("searchDoc").value;
     if(text === ""){
@@ -181,9 +184,9 @@ function searchDocument(){
     
 }
 
-function showUpdate(doc) {
-    doc = JSON.parse(doc)
-    console.log(doc)
+function showUpdate(id) {
+    const encodedId = encodeURIComponent(id);
+    window.location = `updateDocument.html?docId=${encodedId}`;
 }
 
 /*function showAddDocument(){
@@ -201,12 +204,14 @@ function showMain(){
 }*/
 
 // Load document items on page load
-document.addEventListener('DOMContentLoaded', (event) => {
-    let index = window.location.pathname;
-    if(index.endsWith("index.html")){
-        fetchDocuments();
-    }
-    /*document.getElementById("searchDocument").addEventListener("submit", function (e) {
-        e.preventDefault();
-    })*/
-});
+// document.addEventListener('DOMContentLoaded', (event) => {
+//     let index = window.location.pathname;
+//     if(index.endsWith("index.html")){
+//         fetchDocuments();
+//     }
+//    
+//     /*document.getElementById("searchDocument").addEventListener("submit", function (e) {
+//         e.preventDefault();
+//     })*/
+// });
+document.addEventListener('DOMContentLoaded', fetchDocuments );

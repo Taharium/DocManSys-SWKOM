@@ -24,7 +24,6 @@ services:
       - ./WebUI/wwwroot:/app/wwwroot  # Mount static files
     depends_on:
       - rest-api
-      - rabbitmq 
 
   docmansys-dal:
     image: docmansys-dal_image

@@ -102,6 +102,64 @@ namespace DocManSys_RestAPI.Controllers
             return StatusCode((int)response.StatusCode, "Error updating Document in DAL");
         }
 
+
+        // PUT: api/Document/5/upload
+        /// <summary>
+        /// Upload a Document File
+        /// </summary>
+        /// <param name="id">id of the document that should be updated</param>
+        /// <param name="documentFile">File of the document that should be added</param>
+        /// <returns>Returns bad Status Codes if something went wrong</returns>
+        [HttpPut("{id}/upload")]
+        public async Task<IActionResult> UploadFile(int id, IFormFile? documentFile) {
+            /*if (documentFile == null || documentFile.Length == 0) {
+                return BadRequest("No File Uploaded");
+            }*/
+
+            // Hole den Task vom DAL
+            var client = _clientFactory.CreateClient("DocManSys-DAL");
+            var response = await client.GetAsync($"api/DAL/document/{id}");
+            if (!response.IsSuccessStatusCode) {
+                return NotFound($"Error at retrieving document with ID: {id}");
+            }
+
+            // Mappe das empfangene TodoItem auf ein TodoItemDto
+            var documentItem = await response.Content.ReadFromJsonAsync<Document>();
+            if (documentItem == null) {
+                return NotFound($"Document with ID {id} not found.");
+            }
+
+            var document = _mapper.Map<DocumentEntity>(documentItem);
+
+            string fileName;
+            // Setze den Dateinamen im DTO
+            if (documentFile == null || documentFile.Length == 0) {
+                fileName = document.Title;
+            }
+            else {
+                fileName = documentFile.FileName;
+            }
+
+            //var authorLoc = string.IsNullOrEmpty(author) ? document.Author : author;
+            document.Title = fileName;
+
+            // Aktualisiere das Item im DAL, nutze das DTO
+            var updateResponse = await client.PutAsJsonAsync($"api/DAL/document/{id}", document);
+            if (!updateResponse.IsSuccessStatusCode) {
+                return StatusCode((int)updateResponse.StatusCode, $"Error at saving the filename for document with ID {id}");
+            }
+
+            // Nachricht an RabbitMQ
+            try {
+                SendToMessageQueue(fileName);
+            }
+            catch (Exception ex) {
+                return StatusCode(500, $"Error at sending the message to RabbitMQ: {ex.Message}");
+            }
+
+            return Ok(new { message = $"Filename {fileName} for document {id} successfully saved." });
+        }
+
         // POST: api/Document
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         /// <summary>
@@ -118,9 +176,9 @@ namespace DocManSys_RestAPI.Controllers
                 //var item = await response.Content.ReadFromJsonAsync<Document>();
                 //if (item != null)
                 try {
-                    SendtoMessageQueue(document.Title);
+                    SendToMessageQueue(document.Title);
                 } catch(Exception e) {
-                    return StatusCode(500, $"Fehler beim Senden der Nachricht an RabbitMQ: {e.Message}");
+                    return StatusCode(500, $"Error while sending message to RabbitMQ: {e.Message}");
                 }
                 return CreatedAtAction(nameof(GetDocument), new { id = item.Id }, item);
             }
@@ -146,7 +204,7 @@ namespace DocManSys_RestAPI.Controllers
             _logger.LogError($"Failed to delete Document from Database with the ID {id}");
             return StatusCode((int)response.StatusCode, "Error deleting Document in DAL");
         }
-        private void SendtoMessageQueue(string title) {
+        private void SendToMessageQueue(string title) {
             var body = Encoding.UTF8.GetBytes(title);
             _channel.BasicPublish(exchange: "", routingKey: "filequeue", basicProperties: null, body: body);
             Console.WriteLine($@"[x] Sent {title}");

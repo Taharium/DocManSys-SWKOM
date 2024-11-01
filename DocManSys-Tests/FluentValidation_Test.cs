@@ -3,7 +3,7 @@ using FluentValidation.TestHelper;
 
 namespace DocManSys_Tests;
 
-public class Tests {
+public class FluentValidationTest {
     private DocumentValidator _documentValidator;
     
     [SetUp]

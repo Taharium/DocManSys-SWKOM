@@ -45,6 +45,20 @@ namespace DocManSys_DAL.Controllers {
             await documentRepository.UpdateDocumentAsync(item);
             return Ok();
         }
+        
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutAsync(int id, DocumentEntity item) {
+            var documentEntity = await documentRepository.GetDocumentByIdAsync(id);
+            if (documentEntity == null) {
+                return NotFound();
+            }
+
+            documentEntity.Author = item.Author;
+            documentEntity.Image = item.Image;
+            documentEntity.Title = item.Title;
+            await documentRepository.UpdateDocumentAsync(documentEntity);
+            return NoContent();
+        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDocument(int id) {
