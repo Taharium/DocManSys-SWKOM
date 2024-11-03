@@ -6,7 +6,7 @@ function fillCard(doc){ //decodeURIComponent('${encodeURIComponent(JSON.stringif
                 <div class="card-body bg-light">
                     <p class="m-0 " style="font-size: 12px">Title: ${doc.title}</p>
                     <p class="m-0" style="font-size: 12px">Author: ${doc.author}</p>
-                    <button onclick="showUpdate(${doc.id})" class="btn btn-primary mt-1 p-1" style="font-size: 12px">Update</button> 
+                    <button onclick="showUpload(${doc.id})" class="btn btn-primary mt-1 p-1" style="font-size: 12px">Upload</button> 
                     <button onclick="deleteDocument(${doc.id})" class="btn btn-danger mt-1 p-1" style="font-size: 12px">Delete</button>
                     <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
                 </div>
@@ -184,9 +184,9 @@ function searchDocument(){
     
 }
 
-function showUpdate(id) {
+function showUpload(id) {
     const encodedId = encodeURIComponent(id);
-    window.location = `updateDocument.html?docId=${encodedId}`;
+    window.location = `uploadDocument.html?docId=${encodedId}`;
 }
 
 /*function showAddDocument(){

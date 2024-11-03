@@ -6,7 +6,7 @@ namespace DocManSys_DAL.Controllers {
     [Area("DAL")]
     [Route("api/[area]/[controller]")]
     [ApiController]
-    public class DocumentController(IDocumentRepository documentRepository) : ControllerBase {
+    public class DocumentController(IDocumentRepository documentRepository, ILogger<DocumentController> logger) : ControllerBase {
         [HttpGet]
         public async Task<IEnumerable<DocumentEntity>> GetAllDocuments([FromQuery] string searchTerm = "") {
             var documents = await documentRepository.GetAllDocumentsAsync();
@@ -15,21 +15,24 @@ namespace DocManSys_DAL.Controllers {
                     doc.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
                     doc.Author.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
             }
-
+            logger.LogInformation("DAL: Retrieving Documents from Database!");
             return documents.Reverse();
         }
 
         [HttpGet("{id}")]
         public async Task<DocumentEntity?> GetDocumentById(int id) {
+            logger.LogInformation($"DAL: Retrieving Document with ID: {id}");
             return await documentRepository.GetDocumentByIdAsync(id);
         }
 
         [HttpPost]
         public async Task<IActionResult> AddDocument(DocumentEntity documentEntity) {
             if(string.IsNullOrEmpty(documentEntity.Title)) {
+                logger.LogWarning("DAL: Error while adding Document: Title is empty");
                 return BadRequest(new {message = "Title is required"});
             }
 
+            logger.LogInformation($"DAL: Adding Document with ID: {documentEntity.Id}");
             await documentRepository.AddDocumentAsync(documentEntity);
             return Ok();
         }
@@ -38,10 +41,12 @@ namespace DocManSys_DAL.Controllers {
         public async Task<IActionResult> UpdateDocument(DocumentEntity documentEntity) {
             var item = await documentRepository.GetDocumentByIdAsync(documentEntity.Id);
             if (item == null) {
+                logger.LogWarning($"DAL: Error while updating Document: Document with ID: {documentEntity.Id} not found");
                 return NotFound();
             }
-
+            
             item.Title = documentEntity.Title;
+            logger.LogInformation($"DAL: Updating Document with ID: {documentEntity.Id}");
             await documentRepository.UpdateDocumentAsync(item);
             return Ok();
         }
@@ -50,12 +55,15 @@ namespace DocManSys_DAL.Controllers {
         public async Task<IActionResult> PutAsync(int id, DocumentEntity item) {
             var documentEntity = await documentRepository.GetDocumentByIdAsync(id);
             if (documentEntity == null) {
+                logger.LogWarning($"DAL: Error while updating Document: Document with ID: {item.Id} not found");
+
                 return NotFound();
             }
 
             documentEntity.Author = item.Author;
             documentEntity.Image = item.Image;
             documentEntity.Title = item.Title;
+            logger.LogInformation($"DAL: Updating Document with ID: {documentEntity.Id}");
             await documentRepository.UpdateDocumentAsync(documentEntity);
             return NoContent();
         }
@@ -64,9 +72,11 @@ namespace DocManSys_DAL.Controllers {
         public async Task<IActionResult> DeleteDocument(int id) {
             var item = await documentRepository.GetDocumentByIdAsync(id);
             if (item == null) {
+                logger.LogWarning($"DAL: Error while deleting Document: Document with ID: {id} not found");
                 return NotFound();
             }
-
+            
+            logger.LogInformation($"DAL: Deleting Document with ID: {id}");
             await documentRepository.DeleteDocumentAsync(id);
             return NoContent();
         }
