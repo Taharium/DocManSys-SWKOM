@@ -10,6 +10,9 @@ services:
       - ASPNETCORE_URLS=http://+:8081
     depends_on:
       - docmansys-dal
+      - rabbitmq 
+    volumes:
+      - ./uploads:/app/uploads
 
   webUI:
     image: docmansys-webui
@@ -35,6 +38,18 @@ services:
       - ASPNETCORE_URLS=http://+:8082
     depends_on:
       - db
+  
+  ocr_worker:
+    image: ocr_worker_image
+    build:
+      context: ./OcrWorker
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./uploads:/app/uploads
 
   db:
     image: postgres
@@ -71,3 +86,4 @@ networks:
 volumes:
   postgres_data:
   pgadmin:
+

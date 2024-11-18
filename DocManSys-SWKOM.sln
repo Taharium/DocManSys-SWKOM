@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocManSys-DAL", "DocManSys-
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocManSys-Tests", "DocManSys-Tests\DocManSys-Tests.csproj", "{A853CD64-6DA3-4248-BAE3-D6C9BB1392BD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocManSys-OCR_Worker", "DocManSys-OCR_Worker\DocManSys-OCR_Worker.csproj", "{973A3B84-4FF8-4A41-BCF8-A7291F56492D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{A853CD64-6DA3-4248-BAE3-D6C9BB1392BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A853CD64-6DA3-4248-BAE3-D6C9BB1392BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A853CD64-6DA3-4248-BAE3-D6C9BB1392BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{973A3B84-4FF8-4A41-BCF8-A7291F56492D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{973A3B84-4FF8-4A41-BCF8-A7291F56492D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{973A3B84-4FF8-4A41-BCF8-A7291F56492D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{973A3B84-4FF8-4A41-BCF8-A7291F56492D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,6 +2,7 @@
 using DocManSys_RestAPI.Log4Net;
 using DocManSys_RestAPI.Mappings;
 using DocManSys_RestAPI.Models;
+using DocManSys_RestAPI.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 
@@ -38,6 +39,10 @@ namespace DocManSys_RestAPI {
 
             //mapper
             builder.Services.AddAutoMapper(typeof(MappingProfile));
+            
+            builder.Services.AddControllers();
+            builder.Services.AddSingleton<IMessageQueueService, MessageQueueService>();
+            builder.Services.AddHostedService<RabbitMqListenerService>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

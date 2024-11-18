@@ -6,7 +6,7 @@ namespace DocManSys_DAL.Controllers {
     [Area("DAL")]
     [Route("api/[area]/[controller]")]
     [ApiController]
-    public class DocumentController(IDocumentRepository documentRepository) : ControllerBase {
+    public class DocumentController(IDocumentRepository documentRepository, ILogger<DocumentController> logger) : ControllerBase {
         [HttpGet]
         public async Task<IEnumerable<DocumentEntity>> GetAllDocuments([FromQuery] string searchTerm = "") {
             var documents = await documentRepository.GetAllDocumentsAsync();
@@ -44,6 +44,24 @@ namespace DocManSys_DAL.Controllers {
             item.Title = documentEntity.Title;
             await documentRepository.UpdateDocumentAsync(item);
             return Ok();
+        }
+        
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutAsync(int id, DocumentEntity item) {
+            var documentEntity = await documentRepository.GetDocumentByIdAsync(id);
+            if (documentEntity == null) {
+                logger.LogWarning($"DAL: Error while updating Document: Document with ID: {item.Id} not found");
+
+                return NotFound();
+            }
+
+            documentEntity.Author = item.Author;
+            documentEntity.Image = item.Image;
+            documentEntity.Title = item.Title;
+            documentEntity.OcrText = item.OcrText;
+            logger.LogInformation($"DAL: Updating Document with ID: {documentEntity.Id}");
+            await documentRepository.UpdateDocumentAsync(documentEntity);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]

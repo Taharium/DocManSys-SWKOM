@@ -5,6 +5,8 @@
 
         public string Author { get; set; } = "";
         public string Image { get; set; } = "";
+        public string OcrText { get; set; } = "";
+
 
         //For the future
         //public string FileName { get; set; } = "";

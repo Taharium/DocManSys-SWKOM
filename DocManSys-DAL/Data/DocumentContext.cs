@@ -20,6 +20,9 @@ namespace DocManSys_DAL.Data {
                     .HasMaxLength(50);
 
                 entity.Property(e => e.Image);
+                
+                entity.Property(e => e.OcrText)
+                    .HasMaxLength(-1);
             });
 
             base.OnModelCreating(modelBuilder);
