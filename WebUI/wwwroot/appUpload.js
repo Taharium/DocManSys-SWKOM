@@ -1,11 +1,7 @@
 ﻿const apiUrl = 'http://localhost:8081/api/RestAPI/document';
 
 function AddUploadInput(doc){
-    return `<!--<div class="mb-3">
-                <label for="uploadDocumentAuthor" class="form-label">Author</label>
-                <input type="text" class="form-control" id="uploadDocumentAuthor" placeholder="Enter author's name" value="${doc.author}">
-            </div> -->
-    
+    return `
             <!-- Title Field -->
             <div class="mb-3">
                 <label for="uploadDocumentTitle" class="form-label">Title</label>
@@ -16,7 +12,7 @@ function AddUploadInput(doc){
             <div class="d-grid">
                 <button onclick="uploadDocument(${doc.id})" class="btn btn-primary">Upload Document</button>
             </div>
-            <div id="errorDiv" class="redError"></div>`
+            <div id="errorDiv noBulletPoints" class="redError"></div>`
 }
 
 function uploadDocument(id){
@@ -26,9 +22,11 @@ function uploadDocument(id){
 
 function uploadFile(documentId, fileInput) {
     let file = "";
-    if(fileInput.files != null){
-        file = fileInput.files[0];
+    const errorDiv = document.getElementById('errorDiv');
+    if(fileInput.files == null){
+        errorDiv.innerHTML = `<ul><li>No File chosen.</li></ul>`
     }
+    file = fileInput.files[0];
 
     const formData = new FormData();
     formData.append('documentFile', file);
@@ -39,8 +37,20 @@ function uploadFile(documentId, fileInput) {
         body: formData
     })
         .then(response => {
-            console.log(response.status)
-            window.location = "index.html"
+            if (response.ok) {
+                window.location = "index.html"
+                errorDiv.innerHTML = '';
+            } else {
+                response.json().then(err => {
+                    if (err.errors) {
+                        errorDiv.innerHTML = `<ul>` + Object.values(err.errors).map(e => `<li>${e}</li>`).join('') + `</ul>`;
+                    } else {
+                        errorDiv.innerHTML = `<ul><li>Error while uploading File.</li></ul>`;
+                    }
+                }).catch(() => {
+                    errorDiv.innerHTML = `<ul><li>Error while uploading File.</li></ul>`;
+                });
+            }
         })
         .catch(error => {
             console.error('Error:', error);
