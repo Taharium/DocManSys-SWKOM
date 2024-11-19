@@ -16,6 +16,7 @@ public class RabbitMqListenerService : IHostedService {
     private IConnection? _connection;
     private IModel? _channel;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ILogger<RabbitMqListenerService> _logger;
 
     public Task StartAsync(CancellationToken cancellationToken) {
         ConnectToRabbitMq();
@@ -23,12 +24,13 @@ public class RabbitMqListenerService : IHostedService {
         return Task.CompletedTask;
     }
 
-    public RabbitMqListenerService(IHttpClientFactory httpClientFactory) {
+    public RabbitMqListenerService(IHttpClientFactory httpClientFactory, ILogger<RabbitMqListenerService> logger) {
         _httpClientFactory = httpClientFactory;
+        _logger = logger;
     }
 
     private void ConnectToRabbitMq() {
-        int retries = 5;
+        int retries = 10;
         while (retries > 0) {
             try {
                 var factory = new ConnectionFactory()
@@ -37,19 +39,20 @@ public class RabbitMqListenerService : IHostedService {
                 _channel = _connection.CreateModel();
                 _channel.QueueDeclare(queue: "ocr_result_queue", durable: false, exclusive: false, autoDelete: false,
                     arguments: null);
-                Console.WriteLine("Erfolgreich mit RabbitMQ verbunden und Queue erstellt.");
+                _logger.LogInformation("Successfully connected with RabbitMQ and queue created.");
                 break; // Wenn die Verbindung klappt, verlässt es die Schleife
             }
             catch (Exception ex) {
-                Console.WriteLine(
-                    $"Fehler beim Verbinden mit RabbitMQ: {ex.Message}. Versuche es in 5 Sekunden erneut...");
+                _logger.LogError(
+                    $"Error while connecting with RabbitMQ: {ex.Message}. Retry in 5 seconds...");
                 Thread.Sleep(5000);
                 retries--;
             }
         }
 
         if (_connection == null || !_connection.IsOpen) {
-            throw new Exception("Konnte keine Verbindung zu RabbitMQ herstellen, alle Versuche fehlgeschlagen.");
+            _logger.LogCritical("Could not connect to RabbitMQ, all tries failed");
+            throw new Exception("Could not connect to RabbitMQ, all tries failed");
         }
     }
 
@@ -60,12 +63,12 @@ public class RabbitMqListenerService : IHostedService {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
                 var parts = message.Split('|');
-                Console.WriteLine($@"[Listener] Nachricht erhalten: {message}");
+                _logger.LogInformation($@"[Listener] Message received: {message}");
                 if (parts.Length == 2) {
                     var id = parts[0];
                     var extractedText = parts[1];
                     if (string.IsNullOrEmpty(extractedText)) {
-                        Console.WriteLine($@"Fehler: Leerer OCR-Text für Task {id}. Nachricht wird ignoriert.");
+                        _logger.LogWarning($@"Error: empty OCR-Text for document {id}. Message ignored.");
                         return;
                     }
 
@@ -74,34 +77,34 @@ public class RabbitMqListenerService : IHostedService {
                     if (response.IsSuccessStatusCode) {
                         var document = await response.Content.ReadFromJsonAsync<DocumentEntity>();
                         if (document != null) {
-                            Console.WriteLine($@"[Listener] Task {id} erfolgreich abgerufen.");
-                            Console.WriteLine($@"[Listener] OCR Text für Task {id}: {extractedText}");
-                            Console.WriteLine($@"[Listener] Task vor Update: {document}");
+                            _logger.LogInformation($@"[Listener] Document {id} successfully retrived.");
+                            _logger.LogInformation($@"[Listener] OCR Text for Document {id}: {extractedText}");
+                            _logger.LogInformation($@"[Listener] Document before Update: {document}");
                             document.OcrText = extractedText;
                             var updateResponse = await client.PutAsJsonAsync($"/api/DAL/document/{id}", document);
                             if (!updateResponse.IsSuccessStatusCode) {
-                                Console.WriteLine($@"Fehler beim Aktualisieren des Tasks mit ID {id}");
+                                _logger.LogError($@"Error while updating Document mit ID {id}");
                             }
                             else {
-                                Console.WriteLine($@"OCR Text für Task {id} erfolgreich aktualisiert.");
+                                _logger.LogInformation($@"OCR Text for Document {id} successfully updated.");
                             }
                         }
                         else {
-                            Console.WriteLine($@"[Listener] Task {id} nicht gefunden.");
+                            _logger.LogError($@"[Listener] Document {id} not found.");
                         }
                     }
                     else {
-                        Console.WriteLine($@"Fehler beim Abrufen des Tasks mit ID {id}: {response.StatusCode}");
+                        _logger.LogError($@"Error at retrieving Document with ID {id}: {response.StatusCode}");
                     }
                 }
                 else {
-                    Console.WriteLine(@"Fehler: Ungültige Nachricht empfangen.");
+                    _logger.LogError(@"Error: invalid message received.");
                 }
             };
             _channel.BasicConsume(queue: "ocr_result_queue", autoAck: true, consumer: consumer);
         }
         catch (Exception ex) {
-            Console.WriteLine($@"Fehler beim Starten des Listeners für OCR-Ergebnisse: {ex.Message}");
+            _logger.LogError($@"Error while starting listener for OCR-Results: {ex.Message}");
         }
     }
 

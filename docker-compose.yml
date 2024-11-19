@@ -39,17 +39,6 @@ services:
     depends_on:
       - db
   
-  ocr_worker:
-    image: ocr_worker_image
-    build:
-      context: ./OcrWorker
-      dockerfile: Dockerfile
-    depends_on:
-      - rabbitmq
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    volumes:
-      - ./uploads:/app/uploads
 
   db:
     image: postgres
@@ -90,7 +79,18 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=user
       - RABBITMQ_DEFAULT_PASS=password
- 
+  
+  
+  ocr_worker:
+    image: ocr_worker_image
+    build:
+      context: ./DocManSys-OCR_Worker
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./uploads:/app/uploads
+
 networks:
   postgres:
     driver: bridge

@@ -3,7 +3,7 @@ using DocManSys_RestAPI.Models;
 using AutoMapper;
 using DocManSys_DAL.Entities;
 using DocManSys_RestAPI.Services;
-using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System.Text;
 
 namespace DocManSys_RestAPI.Controllers {
@@ -90,10 +90,10 @@ namespace DocManSys_RestAPI.Controllers {
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDocument(int id, Document document) {
             if (id != document.Id) return BadRequest();
-            Console.WriteLine($@"[PUT] Incomming OcrText: {document.OcrText}");
+            _logger.LogInformation($@"[PUT] Incomming OcrText: {document.OcrText}");
             var client = _clientFactory.CreateClient("DocManSys-DAL");
             var item = _mapper.Map<DocumentEntity>(document);
-            Console.WriteLine($@"[PUT] mapped OcrText: {item.OcrText}");
+            _logger.LogInformation($@"[PUT] mapped OcrText: {item.OcrText}");
             var response = await client.PutAsJsonAsync($"api/DAL/document/{id}", item);
             if (response.IsSuccessStatusCode) {
                 _logger.LogInformation($"Updated Document with ID: {id}");
@@ -119,7 +119,6 @@ namespace DocManSys_RestAPI.Controllers {
                 return BadRequest(ModelState);
             }
 
-            // Hole den Task vom DAL
             var client = _clientFactory.CreateClient("DocManSys-DAL");
             var response = await client.GetAsync($"api/DAL/document/{id}");
             if (!response.IsSuccessStatusCode) {
@@ -127,7 +126,6 @@ namespace DocManSys_RestAPI.Controllers {
                 return NotFound($"Error at retrieving document with ID: {id}");
             }
 
-            // Mappe das empfangene TodoItem auf ein TodoItemDto
             var documentItem = await response.Content.ReadFromJsonAsync<DocumentEntity>();
 
             if (documentItem == null) {
@@ -146,10 +144,10 @@ namespace DocManSys_RestAPI.Controllers {
                 return BadRequest(validationResult.Errors);
             }
 
-            // Mappe wieder zurück zu TodoItem, um es im DAL zu aktualisieren
             var updatedDocument = _mapper.Map<DocumentEntity>(document);
 
             var updateResponse = await client.PutAsJsonAsync($"api/DAL/document/{id}", updatedDocument);
+            
             if (!updateResponse.IsSuccessStatusCode) {
                 _logger.LogError($"Error at saving the filename for document with ID {id}");
                 return StatusCode((int)updateResponse.StatusCode,
@@ -162,7 +160,6 @@ namespace DocManSys_RestAPI.Controllers {
                 await documentFile.CopyToAsync(stream);
             }
 
-            // Nachricht an RabbitMQ
             try {
                 _messageQueueService.SendToQueue($"{id}|{filePath}");
                 _logger.LogInformation("Successfully send message to RabbitMQ");
@@ -188,8 +185,6 @@ namespace DocManSys_RestAPI.Controllers {
             var item = _mapper.Map<DocumentEntity>(document);
             var response = await client.PostAsJsonAsync("api/DAL/document", item);
             if (response.IsSuccessStatusCode) {
-                //var item = await response.Content.ReadFromJsonAsync<Document>();
-                //if (item != null)
                 try {
                     _logger.LogInformation($"Added Document with ID: {document.Id}");
                     _messageQueueService.SendToQueue($"{document.Id}|{document.Title}");

@@ -63,23 +63,6 @@ namespace DocManSys_DAL.Controllers {
             documentEntity.Author = item.Author;
             documentEntity.Image = item.Image;
             documentEntity.Title = item.Title;
-            logger.LogInformation($"DAL: Updating Document with ID: {documentEntity.Id}");
-            await documentRepository.UpdateDocumentAsync(documentEntity);
-            return NoContent();
-        }
-        
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAsync(int id, DocumentEntity item) {
-            var documentEntity = await documentRepository.GetDocumentByIdAsync(id);
-            if (documentEntity == null) {
-                logger.LogWarning($"DAL: Error while updating Document: Document with ID: {item.Id} not found");
-
-                return NotFound();
-            }
-
-            documentEntity.Author = item.Author;
-            documentEntity.Image = item.Image;
-            documentEntity.Title = item.Title;
             documentEntity.OcrText = item.OcrText;
             logger.LogInformation($"DAL: Updating Document with ID: {documentEntity.Id}");
             await documentRepository.UpdateDocumentAsync(documentEntity);

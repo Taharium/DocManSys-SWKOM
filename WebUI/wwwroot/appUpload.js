@@ -12,7 +12,7 @@ function AddUploadInput(doc){
             <div class="d-grid">
                 <button onclick="uploadDocument(${doc.id})" class="btn btn-primary">Upload Document</button>
             </div>
-            <div id="errorDiv noBulletPoints" class="redError"></div>`
+            `
 }
 
 function uploadDocument(id){
@@ -23,8 +23,10 @@ function uploadDocument(id){
 function uploadFile(documentId, fileInput) {
     let file = "";
     const errorDiv = document.getElementById('errorDiv');
-    if(fileInput.files == null){
-        errorDiv.innerHTML = `<ul><li>No File chosen.</li></ul>`
+    console.log(fileInput.files)
+    if(fileInput.files === null || fileInput.files.length === 0){
+        errorDiv.innerHTML = `<li>No File chosen.</li>`
+        return;
     }
     file = fileInput.files[0];
 
@@ -43,12 +45,12 @@ function uploadFile(documentId, fileInput) {
             } else {
                 response.json().then(err => {
                     if (err.errors) {
-                        errorDiv.innerHTML = `<ul>` + Object.values(err.errors).map(e => `<li>${e}</li>`).join('') + `</ul>`;
+                        errorDiv.innerHTML = `<span>` + Object.values(err.errors).map(e => `<li>${e}</li>`).join('') + `</span>`;
                     } else {
-                        errorDiv.innerHTML = `<ul><li>Error while uploading File.</li></ul>`;
+                        errorDiv.innerHTML = `<li>Error while uploading File.</li>`;
                     }
                 }).catch(() => {
-                    errorDiv.innerHTML = `<ul><li>Error while uploading File.</li></ul>`;
+                    errorDiv.innerHTML = `<li>Error while uploading File.</li>`;
                 });
             }
         })

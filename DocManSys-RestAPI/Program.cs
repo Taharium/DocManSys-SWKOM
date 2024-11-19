@@ -40,7 +40,7 @@ namespace DocManSys_RestAPI {
             //mapper
             builder.Services.AddAutoMapper(typeof(MappingProfile));
             
-            builder.Services.AddControllers();
+            //builder.Services.AddControllers();
             builder.Services.AddSingleton<IMessageQueueService, MessageQueueService>();
             builder.Services.AddHostedService<RabbitMqListenerService>();
 

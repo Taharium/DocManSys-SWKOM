@@ -1,0 +1,74 @@
+Here are several potential game-related topics for your bachelor's thesis, centered around C++:
+
+1. Game Physics Engine Development
+   - Description: Build a custom physics engine in C++ to simulate realistic environments in games. Focus on collision detection, rigid body dynamics, and handling real-time physics constraints.
+   - Challenges: High-performance optimization, precision in physics simulations, multi-threading.
+   - Expansion: You could explore advanced features like cloth simulation or soft-body physics.
+
+2. AI for Non-Player Characters (NPCs) in Games
+   - Description: Create an AI system in C++ for NPC behavior using techniques like decision trees, finite state machines, or more advanced methods like neural networks.
+   - Challenges: Balancing performance with intelligent behavior, pathfinding, and decision-making in real-time.
+   - Expansion: You could specialize in developing AI for specific genres (like stealth or strategy games) or adaptive AI that learns from player actions.
+
+3. Procedural Generation in Games
+   - Description: Develop a procedural generation system in C++ that automatically generates game levels, terrains, or game assets (e.g., items, dungeons, maps).
+   - Challenges: Performance, randomness, and keeping generated content coherent.
+   - Expansion: You could work on improving procedural narrative generation, where story elements change based on the generated environment.
+
+4. Custom Game Engine Development
+   - Description: Build a lightweight game engine from scratch in C++ that can handle rendering, audio, input, and basic game logic.
+   - Challenges: Efficient handling of game loops, rendering optimizations, resource management (memory, CPU, GPU).
+   - Expansion: Implement more advanced features such as a scripting system, physics engine, or multiplayer support.
+
+5. Networked Multiplayer Game Architecture
+   - Description: Develop a networked multiplayer architecture in C++ for real-time or turn-based games. Focus on handling client-server communications, latency compensation, and data synchronization.
+   - Challenges: Handling lag, synchronizing state between players, avoiding cheating.
+   - Expansion: Implement server-side AI or explore peer-to-peer networking for multiplayer games.
+
+6. Graphics Rendering and Shaders
+   - Description: Create a custom rendering system in C++ that implements modern rendering techniques like deferred shading, real-time lighting, or ray tracing.
+   - Challenges: Efficient GPU usage, advanced lighting algorithms, real-time rendering at 60fps+.
+   - Expansion: Focus on specific graphical effects like real-time water simulation, dynamic shadows, or volumetric lighting.
+
+7. Virtual Reality (VR) Game Development
+   - Description: Develop a VR game or VR framework in C++ that supports interactions in a virtual space. Focus on optimizing performance, input handling, and rendering for VR.
+   - Challenges: Real-time rendering at high frame rates, low-latency input handling, physics interaction in 3D space.
+   - Expansion: Implement features like haptic feedback or hand-tracking support.
+
+8. Real-Time Strategy Game (RTS) AI & Pathfinding
+   - Description: Create a pathfinding system for an RTS game using C++ with algorithms like A* or Dijkstra’s. Incorporate AI strategies for resource management, unit control, and map exploration.
+   - Challenges: Balancing pathfinding performance with large unit counts, simulating complex AI behaviors in real-time.
+   - Expansion: Integrate multiplayer capabilities or complex AI that adapts based on the player’s strategy.
+
+9. Audio Engine for Games
+   - Description: Develop an audio engine in C++ that can handle 3D spatial audio, dynamic music generation, and real-time sound effects.
+   - Challenges: Efficient sound mixing, low-latency processing, and memory management for large sound assets.
+   - Expansion: Implement features like occlusion effects, reverb in dynamic environments, or a music system that adapts to game events.
+
+10. Game Scripting Engine
+   - Description: Build a custom scripting engine in C++ that allows game developers to write game logic using an embedded language like Lua or Python.
+   - Challenges: Efficient communication between the scripting layer and the C++ engine, optimizing for performance.
+   - Expansion: Implement a custom scripting language, or build advanced debugging tools for game developers.
+
+These ideas will give you hands-on experience in both game development and C++ programming, while allowing you to tackle interesting, cutting-edge problems in the game industry. Depending on your interests, you can choose to focus on one specific aspect like physics, AI, networking, or graphics.
+
+
+
+
+Ein spiel -> welcher algo bringt mir ähnliche resultate + 2 algo -> und dann testen
+user generiert so oft er will und nimmt sich eins davon.
+
+vergleich
+ - mein system gegen existierende
+ 
+a/b testing
+
+umfrage
+
+Playability Tests
+
+
+
+
+
+SSIM

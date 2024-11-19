@@ -18,7 +18,7 @@ public class OcrWorker : IDisposable {
     }
 
     private void ConnectToRabbitMq() {
-        int retries = 5;
+        int retries = 10;
         while (retries > 0) {
             try {
                 var factory = new ConnectionFactory()
@@ -28,7 +28,7 @@ public class OcrWorker : IDisposable {
                 _channel.QueueDeclare(queue: "file_queue", durable: false, exclusive: false, autoDelete: false,
                     arguments: null);
                 Console.WriteLine("Erfolgreich mit RabbitMQ verbunden und Queue erstellt.");
-                break; // Wenn die Verbindung klappt, verlässt es die Schleife
+                break; 
             }
             catch (Exception ex) {
                 Console.WriteLine(
