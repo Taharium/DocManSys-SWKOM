@@ -49,7 +49,6 @@ namespace DocManSys_RestAPI.Controllers {
 
             _logger.LogError("Failed to retrieve Documents from Database!");
             return StatusCode((int)response.StatusCode, "Error retrieving Documents from DAL");
-
         }
 
         // GET: api/Document/5
@@ -89,10 +88,10 @@ namespace DocManSys_RestAPI.Controllers {
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDocument(int id, Document document) {
             if (id != document.Id) return BadRequest();
-            Console.WriteLine($@"[PUT] Eingehender OcrText: {document.OcrText}");
+            Console.WriteLine($@"[PUT] Incomming OcrText: {document.OcrText}");
             var client = _clientFactory.CreateClient("DocManSys-DAL");
             var item = _mapper.Map<DocumentEntity>(document);
-            Console.WriteLine($@"[PUT] Gemappter OcrText: {item.OcrText}");
+            Console.WriteLine($@"[PUT] mapped OcrText: {item.OcrText}");
             var response = await client.PutAsJsonAsync($"api/DAL/document/{id}", item);
             if (response.IsSuccessStatusCode) {
                 return NoContent();
@@ -111,9 +110,10 @@ namespace DocManSys_RestAPI.Controllers {
         /// <returns>Returns bad Status Codes if something went wrong</returns>
         [HttpPut("{id}/upload")]
         public async Task<IActionResult> UploadFile(int id, IFormFile? documentFile) {
-            /*if (documentFile == null || documentFile.Length == 0) {
-                return BadRequest("No File Uploaded");
-            }*/
+            if (documentFile == null || documentFile.Length == 0) {
+                ModelState.AddModelError("documentFile", "No File Uploaded.");
+                return BadRequest(ModelState);
+            }
 
             // Hole den Task vom DAL
             var client = _clientFactory.CreateClient("DocManSys-DAL");
@@ -131,15 +131,9 @@ namespace DocManSys_RestAPI.Controllers {
             }
 
             var document = _mapper.Map<Document>(documentItem);
-
-            // Setze den Dateinamen im DTO
-            if (documentFile == null || documentFile.Length == 0) {
-                _logger.LogInformation("Title stayed the same");
-                return StatusCode(201);
-            }
-
+            
             _logger.LogInformation($"Title changed to {documentFile.FileName}");
-            var fileName = documentFile.FileName;
+            document.Title = documentFile.FileName;
 
             var validator = new DocumentValidator();
             var validationResult = await validator.ValidateAsync(document); // Validiere das DTO
@@ -150,19 +144,16 @@ namespace DocManSys_RestAPI.Controllers {
             // Mappe wieder zurück zu TodoItem, um es im DAL zu aktualisieren
             var updatedDocument = _mapper.Map<DocumentEntity>(document);
 
-            //var authorLoc = string.IsNullOrEmpty(author) ? document.Author : author;
-            updatedDocument.Title = fileName;
-
-            // Aktualisiere das Item im DAL, nutze das DTO
             var updateResponse = await client.PutAsJsonAsync($"api/DAL/document/{id}", updatedDocument);
             if (!updateResponse.IsSuccessStatusCode) {
                 _logger.LogError($"Error at saving the filename for document with ID {id}");
                 return StatusCode((int)updateResponse.StatusCode,
                     $"Error at saving the filename for document with ID {id}");
             }
-            
-            var filePath = Path.Combine("/app/uploads", fileName);
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!); // Erstelle das Verzeichnis, falls es nicht existiert
+
+            var filePath = Path.Combine("/app/uploads", documentFile.FileName);
+            Directory.CreateDirectory(
+                Path.GetDirectoryName(filePath)!); // Erstelle das Verzeichnis, falls es nicht existiert
             await using (var stream = new FileStream(filePath, FileMode.Create)) {
                 await documentFile.CopyToAsync(stream);
             }
@@ -177,7 +168,7 @@ namespace DocManSys_RestAPI.Controllers {
                 return StatusCode(500, $"Error at sending the message to RabbitMQ: {ex.Message}");
             }
 
-            return Ok(new { message = $"Filename {fileName} for document {id} successfully saved." });
+            return Ok(new { message = $"Filename {documentFile.FileName} for document {id} successfully saved." });
         }
 
         // POST: api/Document
