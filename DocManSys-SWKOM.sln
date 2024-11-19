@@ -9,13 +9,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		docker-compose.yml = docker-compose.yml
+		rabbitmq.conf = rabbitmq.conf
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebUI", "WebUI\WebUI.csproj", "{1B0E0A9D-7938-4C48-BAAA-CB243D4DE8E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocManSys-DAL", "DocManSys-DAL\DocManSys-DAL.csproj", "{A9CCF157-D775-4527-80C3-89B70C0ACBA4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocManSys-DAL", "DocManSys-DAL\DocManSys-DAL.csproj", "{A9CCF157-D775-4527-80C3-89B70C0ACBA4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocManSys-Tests", "DocManSys-Tests\DocManSys-Tests.csproj", "{A853CD64-6DA3-4248-BAE3-D6C9BB1392BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocManSys-Tests", "DocManSys-Tests\DocManSys-Tests.csproj", "{A853CD64-6DA3-4248-BAE3-D6C9BB1392BD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocManSys-OCR_Worker", "DocManSys-OCR_Worker\DocManSys-OCR_Worker.csproj", "{973A3B84-4FF8-4A41-BCF8-A7291F56492D}"
 EndProject

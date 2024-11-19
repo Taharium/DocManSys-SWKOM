@@ -3,6 +3,8 @@ using DocManSys_RestAPI.Models;
 using AutoMapper;
 using DocManSys_DAL.Entities;
 using DocManSys_RestAPI.Services;
+using RabbitMQ.Client;
+using System.Text;
 
 namespace DocManSys_RestAPI.Controllers {
     /// <summary>
@@ -44,6 +46,7 @@ namespace DocManSys_RestAPI.Controllers {
             if (response.IsSuccessStatusCode) {
                 var items = await response.Content.ReadFromJsonAsync<IEnumerable<DocumentEntity>>();
                 var documents = _mapper.Map<IEnumerable<Document>>(items);
+                _logger.LogInformation($"All Documents fetched!");
                 return Ok(documents);
             }
 
@@ -68,7 +71,6 @@ namespace DocManSys_RestAPI.Controllers {
                     _logger.LogInformation($"Retrieved Document with ID: {id}!");
                     return Ok(document);
                 }
-
                 _logger.LogInformation($"Document with ID: {id} not found");
                 return NotFound();
             }
@@ -94,12 +96,14 @@ namespace DocManSys_RestAPI.Controllers {
             Console.WriteLine($@"[PUT] mapped OcrText: {item.OcrText}");
             var response = await client.PutAsJsonAsync($"api/DAL/document/{id}", item);
             if (response.IsSuccessStatusCode) {
+                _logger.LogInformation($"Updated Document with ID: {id}");
                 return NoContent();
             }
 
             _logger.LogError($"Failed to update Document from Database with the ID {id}");
             return StatusCode((int)response.StatusCode, "Error updating Document in DAL");
         }
+
 
         // PUT: api/Document/5/upload
         /// <summary>
@@ -125,6 +129,7 @@ namespace DocManSys_RestAPI.Controllers {
 
             // Mappe das empfangene TodoItem auf ein TodoItemDto
             var documentItem = await response.Content.ReadFromJsonAsync<DocumentEntity>();
+
             if (documentItem == null) {
                 _logger.LogError($"Document with ID {id} not found.");
                 return NotFound($"Document with ID {id} not found.");
@@ -152,8 +157,7 @@ namespace DocManSys_RestAPI.Controllers {
             }
 
             var filePath = Path.Combine("/app/uploads", documentFile.FileName);
-            Directory.CreateDirectory(
-                Path.GetDirectoryName(filePath)!); // Erstelle das Verzeichnis, falls es nicht existiert
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
             await using (var stream = new FileStream(filePath, FileMode.Create)) {
                 await documentFile.CopyToAsync(stream);
             }
@@ -194,7 +198,7 @@ namespace DocManSys_RestAPI.Controllers {
                     _logger.LogError($"Error while sending message to RabbitMQ: {e.Message}");
                     return StatusCode(500, $"Error while sending message to RabbitMQ: {e.Message}");
                 }
-
+                
                 return CreatedAtAction(nameof(GetDocument), new { id = item.Id }, item);
             }
 
@@ -202,6 +206,7 @@ namespace DocManSys_RestAPI.Controllers {
                 $"Failed to write new Document into Database with the Document Title: {document.Title} and Author: {document.Author} ");
             return StatusCode((int)response.StatusCode, "Error creating Document in DAL");
         }
+
 
         // DELETE: api/Document/5
         /// <summary>
@@ -214,6 +219,7 @@ namespace DocManSys_RestAPI.Controllers {
             var client = _clientFactory.CreateClient("DocManSys-DAL");
             var response = await client.DeleteAsync($"api/DAL/document/{id}");
             if (response.IsSuccessStatusCode) {
+                _logger.LogInformation($"Deleted Document with ID: {id}");
                 return NoContent();
             }
 

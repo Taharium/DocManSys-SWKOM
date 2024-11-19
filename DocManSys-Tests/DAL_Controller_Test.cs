@@ -2,6 +2,7 @@
 using DocManSys_DAL.Entities;
 using DocManSys_DAL.Repositories;
 using FakeItEasy;
+using Microsoft.Extensions.Logging;
 
 namespace DocManSys_Tests;
 
@@ -10,12 +11,14 @@ public class DocumentControllerDalTests
 {
     private DocumentController _controller;
     private IDocumentRepository _fakeDocumentRepository;
+    private ILogger<DocumentController> _logger;
 
     [SetUp]
     public void SetUp()
     {
         _fakeDocumentRepository = A.Fake<IDocumentRepository>();
-        _controller = new DocumentController(_fakeDocumentRepository);
+        _logger = A.Fake<ILogger<DocumentController>>();
+        _controller = new DocumentController(_fakeDocumentRepository, _logger);
     }
 
     [Test]
@@ -95,10 +98,11 @@ public class DocumentControllerDalTests
             .Returns(documents);
 
         // Act
-        var result = await _controller.GetAllDocuments(null);
+        var result = await _controller.GetAllDocuments(null!);
 
         // Assert
-        Assert.That(result.Count(), Is.EqualTo(2));
-        Assert.That(result.First().Title, Is.EqualTo("Document2")); // Check reverse order
+        var documentEntities = result as DocumentEntity[] ?? result.ToArray();
+        Assert.That(documentEntities.Count(), Is.EqualTo(2));
+        Assert.That(documentEntities.First().Title, Is.EqualTo("Document2")); // Check reverse order
     }
 }
