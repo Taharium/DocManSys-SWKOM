@@ -32,17 +32,18 @@ namespace DocManSys_RestAPI {
                     });
             });
 
-            // Add services to the container.
+            builder.Services.AddSingleton<IMinioClientService, MinioClientService>();
+            builder.Services.AddSingleton<IMessageQueueService, MessageQueueService>();
+            builder.Services.AddHostedService<RabbitMqListenerService>();
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
 
             builder.Services.AddControllers();
 
             //mapper
-            builder.Services.AddAutoMapper(typeof(MappingProfile));
+            // Add services to the container.
+
             
             //builder.Services.AddControllers();
-            builder.Services.AddSingleton<IMessageQueueService, MessageQueueService>();
-            builder.Services.AddHostedService<RabbitMqListenerService>();
-
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>

@@ -1,0 +1,8 @@
+Vergleichsanalyse:
+	- Bestimmte Parameter testen und dann vergleichen
+	- Structural Similarity Index (SSIM)
+		- Szenen miteinander vergleichen (Range von -1, 1)
+		- Szene spezialisieren, um herauszufinden, ob Rasterization oder auch Ray Tracing bei bestimmten Features fehlschlagen
+ Umfrage (qualitativ):
+	- Bild Qualität bewerten anhand mehrerer Tester
+	

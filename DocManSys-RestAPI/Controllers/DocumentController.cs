@@ -5,6 +5,7 @@ using DocManSys_DAL.Entities;
 using DocManSys_RestAPI.Services;
 using RabbitMQ.Client.Events;
 using System.Text;
+using Minio;
 
 namespace DocManSys_RestAPI.Controllers {
     /// <summary>
@@ -18,13 +19,16 @@ namespace DocManSys_RestAPI.Controllers {
         private readonly ILogger<DocumentController> _logger;
         private readonly IMapper _mapper;
         private readonly IMessageQueueService _messageQueueService;
+        private readonly IMinioClientService _minioclientservice;
 
         public DocumentController(IHttpClientFactory clientFactory, ILogger<DocumentController> logger, IMapper mapper,
-            IMessageQueueService messageQueueService) {
+            IMessageQueueService messageQueueService, IMinioClientService minioClientService)
+        {
             _logger = logger;
             _clientFactory = clientFactory;
             _mapper = mapper;
             _messageQueueService = messageQueueService;
+            _minioclientservice = minioClientService;
         }
 
         // GET: api/Document
@@ -169,7 +173,15 @@ namespace DocManSys_RestAPI.Controllers {
                 return StatusCode(500, $"Error at sending the message to RabbitMQ: {ex.Message}");
             }
 
-            return Ok(new { message = $"Filename {documentFile.FileName} for document {id} successfully saved." });
+            try {
+                await _minioclientservice.UploadFile(documentFile);
+                _logger.LogInformation("Successfully uploaded the file to Minio");
+            }
+            catch (Exception ex) {
+                _logger.LogError($"Error at uploading the file to Minio: {ex.Message}");
+                return StatusCode(500, $"Error at uploading the file to Minio: {ex.Message}");
+            }
+                return Ok(new { message = $"Filename {documentFile.FileName} for document {id} successfully saved." });
         }
 
         // POST: api/Document
@@ -211,9 +223,17 @@ namespace DocManSys_RestAPI.Controllers {
         /// <returns>Returns bad Status Codes if something went wrong</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDocument(int id) {
+            var documentresult = await GetDocument(id);
+            if(documentresult is NotFoundResult)
+            {
+                return NotFound();
+            }
+            var document = (documentresult as OkObjectResult)?.Value as Document;
             var client = _clientFactory.CreateClient("DocManSys-DAL");
             var response = await client.DeleteAsync($"api/DAL/document/{id}");
-            if (response.IsSuccessStatusCode) {
+            if (response.IsSuccessStatusCode) { 
+                var result = await _minioclientservice.DeleteFile(document.Title);
+                _logger.LogInformation(result.ToString());
                 _logger.LogInformation($"Deleted Document with ID: {id}");
                 return NoContent();
             }

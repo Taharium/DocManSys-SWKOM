@@ -17,7 +17,7 @@ RUN dotnet build "./DocManSys-RestAPI.csproj" -c $BUILD_CONFIGURATION -o /app/bu
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./DocManSys-RestAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./DocManSys-RestAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 
 FROM base AS final
 WORKDIR /app
