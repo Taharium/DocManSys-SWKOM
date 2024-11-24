@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DocManSys_DAL.Controllers {
     [Area("DAL")]
-    [Route("api/[area]/[controller]")]
+    [Route("api/[area]/document")]
     [ApiController]
-    public class DocumentController(IDocumentRepository documentRepository, ILogger<DocumentController> logger) : ControllerBase {
+    public class DocumentControllerDal(IDocumentRepository documentRepository, ILogger<DocumentControllerDal> logger) : ControllerBase {
         [HttpGet]
         public async Task<IEnumerable<DocumentEntity>> GetAllDocuments([FromQuery] string searchTerm = "") {
             var documents = await documentRepository.GetAllDocumentsAsync();

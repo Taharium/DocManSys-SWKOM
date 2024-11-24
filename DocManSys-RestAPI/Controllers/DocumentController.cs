@@ -181,7 +181,7 @@ namespace DocManSys_RestAPI.Controllers {
                 _logger.LogError($"Error at uploading the file to Minio: {ex.Message}");
                 return StatusCode(500, $"Error at uploading the file to Minio: {ex.Message}");
             }
-                return Ok(new { message = $"Filename {documentFile.FileName} for document {id} successfully saved." });
+            return Ok(new { message = $"Filename {documentFile.FileName} for document {id} successfully saved." });
         }
 
         // POST: api/Document
