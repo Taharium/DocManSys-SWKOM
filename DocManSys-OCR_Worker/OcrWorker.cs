@@ -8,6 +8,7 @@ using System.Text;
 using ImageMagick;
 using Tesseract;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 public class OcrWorker : IDisposable {
     private IConnection? _connection;
@@ -17,7 +18,7 @@ public class OcrWorker : IDisposable {
         ConnectToRabbitMq();
     }
 
-    private void ConnectToRabbitMq() {
+    public void ConnectToRabbitMq() {
         int retries = 10;
         while (retries > 0) {
             try {
@@ -76,7 +77,7 @@ public class OcrWorker : IDisposable {
         _channel.BasicConsume(queue: "file_queue", autoAck: true, consumer: consumer);
     }
 
-    private string PerformOcr(string filePath) {
+    public string PerformOcr(string filePath) {
         var stringBuilder = new StringBuilder();
         try {
             using (var images = new MagickImageCollection(filePath)) // MagickImageCollection für mehrere Seiten

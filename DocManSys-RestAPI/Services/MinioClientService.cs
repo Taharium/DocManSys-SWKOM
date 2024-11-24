@@ -21,6 +21,14 @@ namespace DocManSys_RestAPI.Services
             Bucket = "uploads";
         }
 
+        // Constructor for testing purposes
+        public MinioClientService(IMinioClient minioClient)
+        {
+            _minioClient = minioClient;
+            Bucket = "uploads";
+        }
+
+
         public async Task UploadFile(IFormFile file)
         {
             await EnsureBucketExists();

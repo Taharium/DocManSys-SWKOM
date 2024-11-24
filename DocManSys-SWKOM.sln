@@ -17,6 +17,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocManSys-DAL", "DocManSys-DAL\DocManSys-DAL.csproj", "{A9CCF157-D775-4527-80C3-89B70C0ACBA4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocManSys-Tests", "DocManSys-Tests\DocManSys-Tests.csproj", "{A853CD64-6DA3-4248-BAE3-D6C9BB1392BD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{973A3B84-4FF8-4A41-BCF8-A7291F56492D} = {973A3B84-4FF8-4A41-BCF8-A7291F56492D}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocManSys-OCR_Worker", "DocManSys-OCR_Worker\DocManSys-OCR_Worker.csproj", "{973A3B84-4FF8-4A41-BCF8-A7291F56492D}"
 EndProject
