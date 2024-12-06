@@ -2,8 +2,10 @@ using DocManSys_RestAPI.Log4Net;
 using DocManSys_RestAPI.Mappings;
 using DocManSys_RestAPI.Models;
 using DocManSys_RestAPI.Services;
+using Elastic.Clients.Elasticsearch;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+
 
 
 namespace DocManSys_RestAPI {
@@ -36,6 +38,8 @@ namespace DocManSys_RestAPI {
             builder.Services.AddSingleton<IMessageQueueService, MessageQueueService>();
             builder.Services.AddHostedService<RabbitMqListenerService>();
             builder.Services.AddAutoMapper(typeof(MappingProfile));
+            var elasticUri = "http://elasticsearch:9200";
+            builder.Services.AddSingleton(new ElasticsearchClient(new Uri(elasticUri)));
 
             builder.Services.AddControllers();
 

@@ -1,1 +1,0 @@
-Für eine dynamische Szene (Partikel Effects wie Rauch, Feuer oder Wasser,...) in OpenGL verschiedene Algorithmen für das Ray Tracing implementieren und auf verschiedene Parameter vergleichen 
