@@ -80,34 +80,40 @@ public class OcrWorker : IDisposable {
     public string PerformOcr(string filePath) {
         var stringBuilder = new StringBuilder();
         try {
-            using (var images = new MagickImageCollection(filePath)) // MagickImageCollection für mehrere Seiten
-            {
-                foreach (var image in images) {
-                    var tempPngFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".png");
-                    image.Density = new Density(300, 300); // Setze die Auflösung
-                    //image.ColorType = ColorType.Grayscale; //Unnötige Farben weg
-                    //image.Contrast(); // Erhöht den Kontrast
-                    //image.Sharpen(); // Schärft das Bild, um Unschärfen zu reduzieren
-                    //image.Despeckle(); // Entfernt Bildrauschen
-                    image.Format = MagickFormat.Png;
-                    //image.Resize(image.Width * 2, image.Height * 2); // Vergrößere das Bild um das Doppelte
-                    // Prüfe, ob eine erhebliche Schräglage vorhanden ist
-                    image.Write(tempPngFile);
-                    // Verwende die Tesseract CLI für jede Seite
-                    var psi = new ProcessStartInfo {
-                        FileName = "tesseract",
-                        Arguments = $"{tempPngFile} stdout -l eng",
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    };
-                    using (var process = Process.Start(psi)) {
-                        string result = process.StandardOutput.ReadToEnd();
-                        stringBuilder.Append(result);
-                    }
-
-                    File.Delete(tempPngFile); // Lösche die temporäre PNG-Datei nach der Verarbeitung
+            using var images = new MagickImageCollection(filePath);
+            int pageIndex = 1;
+            foreach (var image in images) {
+                var tempPngFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".png");
+                image.Density = new Density(300, 300); // Setze die Auflösung
+                //image.ColorType = ColorType.Grayscale; //Unnötige Farben weg
+                //image.Contrast(); // Erhöht den Kontrast
+                //image.Sharpen(); // Schärft das Bild, um Unschärfen zu reduzieren
+                //image.Despeckle(); // Entfernt Bildrauschen
+                image.Format = MagickFormat.Png;
+                //image.Resize(image.Width * 2, image.Height * 2); // Vergrößere das Bild um das Doppelte
+                // Prüfe, ob eine erhebliche Schräglage vorhanden ist
+                image.Write(tempPngFile);
+                // Verwende die Tesseract CLI für jede Seite
+                var psi = new ProcessStartInfo {
+                    FileName = "tesseract",
+                    Arguments = $"{tempPngFile} stdout -l eng",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                string? pageText = null;
+                using (var process = Process.Start(psi)) {
+                    pageText = process?.StandardOutput.ReadToEnd();
                 }
+
+                File.Delete(tempPngFile); // Lösche die temporäre PNG-Datei nach der Verarbeitung
+                    
+                if (!string.IsNullOrWhiteSpace(pageText)) {
+                    stringBuilder.Append(pageText);
+                    Console.WriteLine($"[Page {pageIndex}] Text extracted successfully.");
+                }
+
+                ++pageIndex;
             }
         }
         catch (Exception ex) {
@@ -118,7 +124,7 @@ public class OcrWorker : IDisposable {
             }
         }
 
-        return stringBuilder.ToString();
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes(stringBuilder.ToString()));
     }
 
     public void Dispose() {

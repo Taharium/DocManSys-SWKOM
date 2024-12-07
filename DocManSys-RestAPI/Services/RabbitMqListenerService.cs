@@ -66,7 +66,7 @@ public class RabbitMqListenerService : IHostedService {
                 _logger.LogInformation($@"[Listener] Message received: {message}");
                 if (parts.Length == 2) {
                     var id = parts[0];
-                    var extractedText = parts[1];
+                    var extractedText = Encoding.UTF8.GetString(Convert.FromBase64String(parts[1]));
                     if (string.IsNullOrEmpty(extractedText)) {
                         _logger.LogWarning($@"Error: empty OCR-Text for document {id}. Message ignored.");
                         return;
