@@ -2,15 +2,27 @@ const apiUrl = 'http://localhost:8081/api/RestAPI/document';
 
 function fillCard(doc){ //decodeURIComponent('${encodeURIComponent(JSON.stringify(doc))}')
     return `<div class="card m-2">
-                <img src="${doc.image}" class="card-img-top" alt="${doc.title}" style="width: 150px; height: 150px">
-                <div class="card-body bg-light">
-                    <p class="m-0 " style="font-size: 12px">Title: ${doc.title}</p>
-                    <p class="m-0" style="font-size: 12px">Author: ${doc.author}</p>
-                    <button onclick="showUpload(${doc.id})" class="btn btn-primary mt-1 p-1" style="font-size: 12px">Upload</button> 
-                    <button onclick="deleteDocument(${doc.id})" class="btn btn-danger mt-1 p-1" style="font-size: 12px">Delete</button>
-                    <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
+                <div class="d-flex card-body bg-light">
+                    <div class="d-flex flex-column">
+                        <div class="d-flex">
+                            <strong class="align-self-start me-2">Author:</strong> <span>${doc.author}</span>
+                        </div>
+                        <div class="d-flex">
+                            <strong class="align-self-start me-2">Title:</strong> <a href="#" onclick="downloadFile('${doc.title}')">${doc.title}</a>
+                        </div>
+                    </div>
+                    
+            
+                    <!-- Spacer to push buttons to the right -->
+                    <div class="flex-grow-1 border-end me-3"></div>
+            
+                    <div class="">
+                        <button onclick="showUpload(${doc.id})" class="btn btn-primary mt-1 p-1">Upload</button>
+                        <button onclick="deleteDocument(${doc.id})" class="btn btn-danger mt-1 p-1">Delete</button>
+                    </div>
                 </div>
-            </div>`
+            </div>
+`
 }
 
 // Function to fetch and display Documents 
@@ -46,64 +58,62 @@ function fetchDocuments() {
 }
 
 // Function to add a new Document
-// function addDocument() {
-//     const title = document.getElementById('documentTitle').value;
-//     const author = document.getElementById('documentAuthor').value;
-//     const errorDiv = document.getElementById('errorDiv');
-//     /*const errorAutor = document.getElementById("errorAuthor");
-//     const errorTitle = document.getElementById("errorTitle");
-//
-//     let isValid = true
-//     if (author.trim() === '') {
-//         errorAutor.innerHTML = "Please enter a Document Author";
-//         isValid = false
-//     } else {
-//         errorAutor.innerHTML = ""
-//     }
-//
-//     if (title.trim() === '') {
-//         errorTitle.innerHTML = "Please enter a Document Title";
-//         isValid = false
-//     } else {
-//         errorTitle.innerHTML = ""
-//     }
-//
-//     if (!isValid) {
-//         return;
-//     }*/
-//
-//     const newDocument = {
-//         author: author,
-//         title: title,
-//         image: "Images/default_pdf.png"
-//     };
-//
-//     console.log(JSON.stringify(newDocument))
-//
-//     fetch(apiUrl, {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify(newDocument)
-//     })
-//         .then(response => {
-//             console.log(response)
-//             if (response.ok) {
-//                 author.value = ""
-//                 title.value = ""
-//                 errorDiv.innerHTML = "";
-//                 window.location.href = "index.html"
-//                 //fetchDocuments(); // Refresh the list after adding
-//             } else {
-//                 // Neues Handling für den Fall eines Fehlers (z.B. leeres Namensfeld)
-//                 response.json().then(err => {
-//                     errorDiv.innerHTML = `<ul>` + Object.values(err.errors).map(e => `<li>${e}</li>`).join('') + `</ul>`
-//                 });
-//             }
-//         })
-//         .catch(error => console.error('Fehler:', error));
-// }
+function addDocument() {
+    //const title = document.getElementById('documentTitle').files[0].name;
+    const author = document.getElementById('documentAuthor').value;
+    const errorDiv = document.getElementById('errorDiv');
+    /*const errorAutor = document.getElementById("errorAuthor");
+    const errorTitle = document.getElementById("errorTitle");
+
+    let isValid = true
+    if (author.trim() === '') {
+        errorAutor.innerHTML = "Please enter a Document Author";
+        isValid = false
+    } else {
+        errorAutor.innerHTML = ""
+    }
+
+    if (title.trim() === '') {
+        errorTitle.innerHTML = "Please enter a Document Title";
+        isValid = false
+    } else {
+        errorTitle.innerHTML = ""
+    }
+
+    if (!isValid) {
+        return;
+    }*/
+
+    const newDocument = {
+        author: author,
+        title: "empty_doc.pdf",
+    };
+
+    console.log(JSON.stringify(newDocument))
+
+    fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newDocument)
+    })
+        .then(response => {
+            console.log(response)
+            if (response.ok) {
+                author.value = ""
+                errorDiv.innerHTML = "";
+                //window.location.href = "index.html"
+                fetchDocuments(); // Refresh the list after adding
+            } else {
+                // Neues Handling für den Fall eines Fehlers (z.B. leeres Namensfeld)
+                response.json().then(err => {
+                    errorDiv.innerHTML = `<ul>` + Object.values(err.errors).map(e => `<li>${e}</li>`).join('') + `</ul>`
+                });
+            }
+        })
+        .catch(error => console.error('Fehler:', error));
+}
 
 // Function to delete a Document
 function deleteDocument(id) {
@@ -159,6 +169,9 @@ function searchDocument(){
         fetchDocuments()
         return;
     }
+    if(text.length < 3){
+        return;
+    }
     const searchUrl = `${apiUrl}?searchTerm=${encodeURIComponent(text)}`;
     
     fetch(searchUrl)
@@ -182,6 +195,18 @@ function searchDocument(){
         })
         .catch(error => console.error('Searching not working', error));
     
+}
+
+function downloadFile(fileName) {
+    console.log(fileName);
+    const fileUrl = `${apiUrl}/download/${fileName}`;
+
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName; // Suggests a file name for saving
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 function showUpload(id) {

@@ -122,6 +122,10 @@ namespace DocManSys_RestAPI.Controllers {
                 ModelState.AddModelError("documentFile", "No File Uploaded.");
                 return BadRequest(ModelState);
             }
+            if (!documentFile.FileName.EndsWith(".pdf")) {
+                ModelState.AddModelError("documentFile", "Only PDF-Files are allowed.");
+                return BadRequest(ModelState);
+            }
 
             var client = _clientFactory.CreateClient("DocManSys-DAL");
             var response = await client.GetAsync($"api/DAL/document/{id}");
@@ -199,7 +203,7 @@ namespace DocManSys_RestAPI.Controllers {
             if (response.IsSuccessStatusCode) {
                 try {
                     _logger.LogInformation($"Added Document with ID: {document.Id}");
-                    _messageQueueService.SendToQueue($"{document.Id}|{document.Title}");
+                    //_messageQueueService.SendToQueue($"{document.Id}|{document.Title}");
                 }
                 catch (Exception e) {
                     _logger.LogError($"Error while sending message to RabbitMQ: {e.Message}");
@@ -212,6 +216,33 @@ namespace DocManSys_RestAPI.Controllers {
             _logger.LogError(
                 $"Failed to write new Document into Database with the Document Title: {document.Title} and Author: {document.Author} ");
             return StatusCode((int)response.StatusCode, "Error creating Document in DAL");
+        }
+        
+        // GET: api/document/download/empty_doc.pdf
+        /// <summary>
+        /// Download a file from the server.
+        /// </summary>
+        /// <param name="fileName">The name of the file to be downloaded.</param>
+        /// <returns>
+        /// status codes:
+        /// - 200 OK: The file is returned successfully.
+        /// - 404 Not Found: The specified file does not exist.
+        /// </returns>
+        [HttpGet("download/{fileName}")]
+        public IActionResult DownloadFile(string fileName) {
+            // Combine the requested file with the uploads path
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", fileName);
+            Console.WriteLine(filePath);
+            
+            if (!System.IO.File.Exists(filePath)) {
+                return NotFound(new { message = $"File '{filePath}' not found." });
+            }
+
+            // Determine the content type (optional, defaults to binary)
+            var contentType = "application/octet-stream"; 
+
+            // Return the file as a download
+            return PhysicalFile(filePath, contentType, fileName);
         }
 
 

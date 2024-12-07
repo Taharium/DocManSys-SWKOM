@@ -22,9 +22,6 @@
                     <li class="nav-item ">
                         <a class="nav-link" href="index.html">Home</a>
                     </li>
-                    <li class="nav-item ">
-                        <a class="nav-link" href="addDocument.html">Add Document</a>
-                    </li>
                     <!--<li class="nav-item ">
                         <button class="nav-link" onclick="showMain()">Home</button>
                     </li>
@@ -44,14 +41,45 @@
     <h1 class="h1" >Welcome to DocManSys</h1>
     <p class="lead">A simple way to upload and search documents!</p>
     <div class=" m-2 d-flex align-self-center justify-content-center col-xl-8 col-lg-9 col-12">
-        <input id="searchDoc" onkeyup="searchDocument()" class=" shadow-sm form-control " type="search" placeholder="Search" aria-label="Search">
+        <div class="col me-2 d-flex flex-column">
+            <label for="searchDoc" class="align-self-start form-label">Please type more than 3 letters</label>
+            <input id="searchDoc" onkeyup="searchDocument()" class=" shadow-sm form-control " type="search" placeholder="Search" aria-label="Search">
+        </div>
+        <div class="align-self-end " > <!--col-xl-2 col-lg-3 col-3 col-sm-3-->
+            <button type="button" class=" btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                Add Document
+            </button>
+        </div>
     </div>
     <div id="container" class="shadow-sm bg-white border rounded p-3 flex-wrap noBulletPoints">
-        <div id="documentList" class="noBulletPoints overflow-y-auto d-flex flex-wrap"></div>
+        <ul id="documentList" class="noBulletPoints overflow-y-auto "></ul>
         <div id="throbber"></div>
     </div>
     <!---->
 </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-light">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Add Document</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body ">
+                    <div id="documentForm">
+                        <label for="documentAuthor" class="form-label">Author</label>
+                        <input type="text" class="form-control" id="documentAuthor" placeholder="Enter author's name" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button onclick="addDocument()" data-bs-dismiss="modal" type="button" class="btn btn-primary">Submit Document</button>
+                </div>
+                <div id="errorDiv" class="redError noBulletPoints"></div>
+            </div>
+        </div>
+    </div>
 
     <!--Add content
     <div id="add" class="container text-center mt-5">

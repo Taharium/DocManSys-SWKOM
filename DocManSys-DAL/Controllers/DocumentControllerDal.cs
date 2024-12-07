@@ -61,7 +61,6 @@ namespace DocManSys_DAL.Controllers {
             }
 
             documentEntity.Author = item.Author;
-            documentEntity.Image = item.Image;
             documentEntity.Title = item.Title;
             documentEntity.OcrText = item.OcrText;
             logger.LogInformation($"DAL: Updating Document with ID: {documentEntity.Id}");

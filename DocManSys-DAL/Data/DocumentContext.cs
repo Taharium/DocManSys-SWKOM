@@ -18,8 +18,6 @@ namespace DocManSys_DAL.Data {
                 
                 entity.Property(e => e.Author)
                     .HasMaxLength(50);
-
-                entity.Property(e => e.Image);
                 
                 entity.Property(e => e.OcrText)
                     .HasMaxLength(-1);
@@ -30,15 +28,13 @@ namespace DocManSys_DAL.Data {
             modelBuilder.Entity<DocumentEntity>().HasData(
                 new DocumentEntity {
                     Id = 1,
-                    Title = "Sample Document 1",
+                    Title = "empty_doc.pdf",
                     Author = "Author A",
-                    Image = "Images/default_pdf.png"
                 },
                 new DocumentEntity {
                     Id = 2,
-                    Title = "Sample Document 2",
+                    Title = "empty_doc.pdf",
                     Author = "Author B",
-                    Image = "Images/default_pdf.png"
                 }
             );
         }

@@ -38,7 +38,7 @@ namespace DocManSys_RestAPI {
             builder.Services.AddSingleton<IMessageQueueService, MessageQueueService>();
             builder.Services.AddHostedService<RabbitMqListenerService>();
             builder.Services.AddAutoMapper(typeof(MappingProfile));
-            var elasticUri = "http://elasticsearch:9200";
+            var elasticUri = builder.Configuration.GetConnectionString("ElasticSearch") ?? "http://elasticsearch:9200";
             builder.Services.AddSingleton(new ElasticsearchClient(new Uri(elasticUri)));
 
             builder.Services.AddControllers();

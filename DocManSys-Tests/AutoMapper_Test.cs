@@ -20,7 +20,6 @@ public class AutoMapper_Test {
             Id = 4,
             Title = "hfdjkhs",
             Author = "jkfdhkd",
-            Image = "jkhfjkdh"
         };
         
         var actual = _mapper.Map<Document, DocumentEntity>(item);
@@ -28,8 +27,6 @@ public class AutoMapper_Test {
         Assert.That(item.Title, Is.EqualTo(actual.Title));
         Assert.That(item.Id, Is.EqualTo(actual.Id));
         Assert.That(item.Author, Is.EqualTo(actual.Author));
-        Assert.That(item.Image, Is.EqualTo(actual.Image));
-        Assert.That(actual.Image, Is.EqualTo(item.Image));
     }
     [Test]
     public void DocumentEntity_to_Document() {
@@ -37,7 +34,6 @@ public class AutoMapper_Test {
             Id = 4,
             Title = "hfdjkhs",
             Author = "jkfdhkd",
-            Image = "jkhfjkdh"
         };
         
         var actual = _mapper.Map<DocumentEntity, Document>(item);
@@ -45,7 +41,5 @@ public class AutoMapper_Test {
         Assert.That(item.Title, Is.EqualTo(actual.Title));
         Assert.That(item.Id, Is.EqualTo(actual.Id));
         Assert.That(item.Author, Is.EqualTo(actual.Author));
-        Assert.That(item.Image, Is.EqualTo(actual.Image));
-        Assert.That(actual.Image, Is.EqualTo(item.Image));
     }
 }

@@ -169,7 +169,6 @@ public class DocumentControllerDalTestsPost
             Id = 1,
             Title = "Valid Title",
             Author = "Author Name",
-            Image = "Image URL",
             OcrText = "OCR Text"
         };
 
@@ -190,7 +189,6 @@ public class DocumentControllerDalTestsPost
             Id = 2,
             Title = "", // Invalid empty title
             Author = "Author Name",
-            Image = "Image URL",
             OcrText = "OCR Text"
         };
 
