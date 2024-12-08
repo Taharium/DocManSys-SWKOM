@@ -39,7 +39,7 @@ function fetchDocuments() {
             const documentList = document.getElementById('documentList');
             throbber.style.display = 'none';
             documentList.innerHTML = ''; // Clear the list before appending new items
-            if (data.length === 0) {
+            if (!data || data.length === 0) {
                 const li = document.createElement('li');
                 li.innerHTML = "No Documents";
                 documentList.appendChild(li);
@@ -49,6 +49,7 @@ function fetchDocuments() {
                 const li = document.createElement('li');
                 li.innerHTML = fillCard(doc);
                 documentList.appendChild(li);
+                console.log(doc.ocrText);
             });
         })
         .catch(error => {
@@ -172,21 +173,29 @@ function searchDocument(){
     if(text.length < 3){
         return;
     }
-    const searchUrl = `${apiUrl}?searchTerm=${encodeURIComponent(text)}`;
-    
-    fetch(searchUrl)
+    const searchUrl = `${apiUrl}/search/fuzzy`;
+
+
+    fetch(searchUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json' // Inform the server about the JSON payload
+        },
+        body: JSON.stringify(text) // Send the search term in the body
+    })
         .then(response =>
             response.json()
         )
         .then(data => {
             const documentList = document.getElementById('documentList');
             documentList.innerHTML = '';
-            if(data.length === 0){
+            if(!data || data.length === 0 || (data.message && typeof data.message === 'string')){
                 const li = document.createElement('li');
                 li.innerHTML = `<div class="h5">No Documents Found</div>`
                 documentList.appendChild(li)
                 return
             }
+            console.log(data)
             data.forEach(doc => {
                 const li = document.createElement('li');
                 li.innerHTML = fillCard(doc);

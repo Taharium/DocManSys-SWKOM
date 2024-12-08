@@ -5,6 +5,7 @@ using DocManSys_DAL.Entities;
 using DocManSys_RestAPI.Services;
 using RabbitMQ.Client.Events;
 using System.Text;
+using Elastic.Clients.Elasticsearch;
 using Minio;
 
 namespace DocManSys_RestAPI.Controllers {
@@ -20,15 +21,17 @@ namespace DocManSys_RestAPI.Controllers {
         private readonly IMapper _mapper;
         private readonly IMessageQueueService _messageQueueService;
         private readonly IMinioClientService _minioclientservice;
+        private readonly ElasticsearchService _elasticsearchService;
 
         public DocumentController(IHttpClientFactory clientFactory, ILogger<DocumentController> logger, IMapper mapper,
-            IMessageQueueService messageQueueService, IMinioClientService minioClientService)
-        {
+            IMessageQueueService messageQueueService, IMinioClientService minioClientService,
+            ElasticsearchService elasticsearchService) {
             _logger = logger;
             _clientFactory = clientFactory;
             _mapper = mapper;
             _messageQueueService = messageQueueService;
             _minioclientservice = minioClientService;
+            _elasticsearchService = elasticsearchService;
         }
 
         // GET: api/Document
@@ -75,6 +78,7 @@ namespace DocManSys_RestAPI.Controllers {
                     _logger.LogInformation($"Retrieved Document with ID: {id}!");
                     return Ok(document);
                 }
+
                 _logger.LogInformation($"Document with ID: {id} not found");
                 return NotFound();
             }
@@ -122,6 +126,7 @@ namespace DocManSys_RestAPI.Controllers {
                 ModelState.AddModelError("documentFile", "No File Uploaded.");
                 return BadRequest(ModelState);
             }
+
             if (!documentFile.FileName.EndsWith(".pdf")) {
                 ModelState.AddModelError("documentFile", "Only PDF-Files are allowed.");
                 return BadRequest(ModelState);
@@ -142,7 +147,7 @@ namespace DocManSys_RestAPI.Controllers {
             }
 
             var document = _mapper.Map<Document>(documentItem);
-            
+
             _logger.LogInformation($"Title changed to {documentFile.FileName}");
             document.Title = documentFile.FileName;
 
@@ -155,7 +160,7 @@ namespace DocManSys_RestAPI.Controllers {
             var updatedDocument = _mapper.Map<DocumentEntity>(document);
 
             var updateResponse = await client.PutAsJsonAsync($"api/DAL/document/{id}", updatedDocument);
-            
+
             if (!updateResponse.IsSuccessStatusCode) {
                 _logger.LogError($"Error at saving the filename for document with ID {id}");
                 return StatusCode((int)updateResponse.StatusCode,
@@ -185,6 +190,7 @@ namespace DocManSys_RestAPI.Controllers {
                 _logger.LogError($"Error at uploading the file to Minio: {ex.Message}");
                 return StatusCode(500, $"Error at uploading the file to Minio: {ex.Message}");
             }
+
             return Ok(new { message = $"Filename {documentFile.FileName} for document {id} successfully saved." });
         }
 
@@ -203,13 +209,19 @@ namespace DocManSys_RestAPI.Controllers {
             if (response.IsSuccessStatusCode) {
                 try {
                     _logger.LogInformation($"Added Document with ID: {document.Id}");
+                    var indexResponse = await _elasticsearchService.IndexDocumentAsync(document);
+
+                    if (!indexResponse.IsValidResponse) {
+                        return StatusCode(500,
+                            new { message = "Failed to index document", details = indexResponse.DebugInformation });
+                    }
                     //_messageQueueService.SendToQueue($"{document.Id}|{document.Title}");
                 }
                 catch (Exception e) {
                     _logger.LogError($"Error while sending message to RabbitMQ: {e.Message}");
                     return StatusCode(500, $"Error while sending message to RabbitMQ: {e.Message}");
                 }
-                
+
                 return CreatedAtAction(nameof(GetDocument), new { id = item.Id }, item);
             }
 
@@ -217,7 +229,7 @@ namespace DocManSys_RestAPI.Controllers {
                 $"Failed to write new Document into Database with the Document Title: {document.Title} and Author: {document.Author} ");
             return StatusCode((int)response.StatusCode, "Error creating Document in DAL");
         }
-        
+
         // GET: api/document/download/empty_doc.pdf
         /// <summary>
         /// Download a file from the server.
@@ -233,18 +245,17 @@ namespace DocManSys_RestAPI.Controllers {
             // Combine the requested file with the uploads path
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", fileName);
             Console.WriteLine(filePath);
-            
+
             if (!System.IO.File.Exists(filePath)) {
                 return NotFound(new { message = $"File '{filePath}' not found." });
             }
 
             // Determine the content type (optional, defaults to binary)
-            var contentType = "application/octet-stream"; 
+            var contentType = "application/octet-stream";
 
             // Return the file as a download
             return PhysicalFile(filePath, contentType, fileName);
         }
-
 
         // DELETE: api/Document/5
         /// <summary>
@@ -255,15 +266,17 @@ namespace DocManSys_RestAPI.Controllers {
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDocument(int id) {
             var documentresult = await GetDocument(id);
-            if(documentresult is NotFoundResult)
-            {
+            if (documentresult is NotFoundResult) {
                 return NotFound();
             }
+
             var document = (documentresult as OkObjectResult)?.Value as Document;
             var client = _clientFactory.CreateClient("DocManSys-DAL");
             var response = await client.DeleteAsync($"api/DAL/document/{id}");
-            if (response.IsSuccessStatusCode) { 
+            if (response.IsSuccessStatusCode) {
                 var result = await _minioclientservice.DeleteFile(document.Title);
+                var deleteResponse = await _elasticsearchService.DeleteDocumentAsync(id);
+                
                 _logger.LogInformation(result.ToString());
                 _logger.LogInformation($"Deleted Document with ID: {id}");
                 return NoContent();
@@ -271,6 +284,37 @@ namespace DocManSys_RestAPI.Controllers {
 
             _logger.LogError($"Failed to delete Document from Database with the ID {id}");
             return StatusCode((int)response.StatusCode, "Error deleting Document in DAL");
+        }
+
+        // POST api/document/search/fuzzy
+        /// <summary>
+        /// Performs a fuzzy search on the "documents" index in Elasticsearch.
+        /// </summary>
+        /// <param name="searchTerm">The search term to look for. Supports minor variations due to fuzziness.</param>
+        /// <returns>
+        /// An IActionResult containing the search results or an error message if the input is invalid.
+        /// </returns>
+        [HttpPost("search/fuzzy")]
+        public async Task<IActionResult> SearchByFuzzy([FromBody] string searchTerm) {
+            if (string.IsNullOrWhiteSpace(searchTerm)) {
+                return BadRequest(new { message = "Search term cannot be empty" });
+            }
+
+            var response = await _elasticsearchService.SearchDocumentsFuzzyAsync(searchTerm);
+
+            return HandleSearchResponse(response);
+        }
+
+        private IActionResult HandleSearchResponse(SearchResponse<Document> response) {
+            if (response.IsValidResponse) {
+                if (response.Documents.Any()) {
+                    return Ok(response.Documents);
+                }
+
+                return NotFound(new { message = "No documents found matching the search term." });
+            }
+
+            return StatusCode(500, new { message = "Failed to search documents", details = response.DebugInformation });
         }
     }
 }

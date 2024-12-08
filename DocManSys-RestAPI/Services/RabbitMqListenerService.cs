@@ -17,6 +17,7 @@ public class RabbitMqListenerService : IHostedService {
     private IModel? _channel;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<RabbitMqListenerService> _logger;
+    private readonly ElasticsearchService _elasticsearchService;
 
     public Task StartAsync(CancellationToken cancellationToken) {
         ConnectToRabbitMq();
@@ -24,9 +25,10 @@ public class RabbitMqListenerService : IHostedService {
         return Task.CompletedTask;
     }
 
-    public RabbitMqListenerService(IHttpClientFactory httpClientFactory, ILogger<RabbitMqListenerService> logger) {
+    public RabbitMqListenerService(IHttpClientFactory httpClientFactory, ILogger<RabbitMqListenerService> logger, ElasticsearchService elasticsearchService) {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
+        _elasticsearchService = elasticsearchService;
     }
 
     private void ConnectToRabbitMq() {
@@ -82,8 +84,12 @@ public class RabbitMqListenerService : IHostedService {
                             _logger.LogInformation($@"[Listener] Document before Update: {document}");
                             document.OcrText = extractedText;
                             var updateResponse = await client.PutAsJsonAsync($"/api/DAL/document/{id}", document);
+                            var indexResponse =  await _elasticsearchService.IndexDocumentEntityAsync(document);
                             if (!updateResponse.IsSuccessStatusCode) {
-                                _logger.LogError($@"Error while updating Document mit ID {id}");
+                                _logger.LogError($@"Error while updating Document with ID {id}");
+                            }
+                            else if(!indexResponse) {
+                                _logger.LogError($@"Error indexing Document with ID {id}");
                             }
                             else {
                                 _logger.LogInformation($@"OCR Text for Document {id} successfully updated.");

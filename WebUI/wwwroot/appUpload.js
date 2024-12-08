@@ -5,7 +5,7 @@ function AddUploadInput(doc){
             <!-- Title Field -->
             <div class="mb-3">
                 <label for="uploadDocumentTitle" class="form-label">Title</label>
-                <input type="file" class="form-control" id="uploadDocumentTitle">
+                <input type="file" class="form-control" id="uploadDocumentTitle" accept="application/pdf">
                 <span class="d-flex align-self-start">Previous Document: ${doc.title}</span>
             </div>
             
