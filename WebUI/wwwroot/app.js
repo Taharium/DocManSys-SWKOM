@@ -49,7 +49,7 @@ function fetchDocuments() {
                 const li = document.createElement('li');
                 li.innerHTML = fillCard(doc);
                 documentList.appendChild(li);
-                console.log(doc.ocrText);
+                console.log(doc.id)
             });
         })
         .catch(error => {
@@ -61,7 +61,7 @@ function fetchDocuments() {
 // Function to add a new Document
 function addDocument() {
     //const title = document.getElementById('documentTitle').files[0].name;
-    const author = document.getElementById('documentAuthor').value;
+    const author = document.getElementById('documentAuthor');
     const errorDiv = document.getElementById('errorDiv');
     /*const errorAutor = document.getElementById("errorAuthor");
     const errorTitle = document.getElementById("errorTitle");
@@ -86,10 +86,12 @@ function addDocument() {
     }*/
 
     const newDocument = {
-        author: author,
+        author: author.value,
         title: "empty_doc.pdf",
     };
-
+    
+    console.log(author)
+    
     console.log(JSON.stringify(newDocument))
 
     fetch(apiUrl, {
@@ -114,6 +116,7 @@ function addDocument() {
             }
         })
         .catch(error => console.error('Fehler:', error));
+    author.value = ""
 }
 
 // Function to delete a Document
@@ -173,7 +176,7 @@ function searchDocument(){
     if(text.length < 3){
         return;
     }
-    const searchUrl = `${apiUrl}/search/fuzzy`;
+    const searchUrl = `${apiUrl}/search/querystring`;
 
 
     fetch(searchUrl, {

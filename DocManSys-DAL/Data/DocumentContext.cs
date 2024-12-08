@@ -25,18 +25,7 @@ namespace DocManSys_DAL.Data {
 
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<DocumentEntity>().HasData(
-                new DocumentEntity {
-                    Id = 1,
-                    Title = "empty_doc.pdf",
-                    Author = "Author A",
-                },
-                new DocumentEntity {
-                    Id = 2,
-                    Title = "empty_doc.pdf",
-                    Author = "Author B",
-                }
-            );
+            
         }
     }
 }

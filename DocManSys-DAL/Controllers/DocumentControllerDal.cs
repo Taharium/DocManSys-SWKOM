@@ -34,7 +34,7 @@ namespace DocManSys_DAL.Controllers {
 
             logger.LogInformation($"DAL: Adding Document with ID: {documentEntity.Id}");
             await documentRepository.AddDocumentAsync(documentEntity);
-            return Ok();
+            return Ok(documentEntity);
         }
 
         [HttpPut]

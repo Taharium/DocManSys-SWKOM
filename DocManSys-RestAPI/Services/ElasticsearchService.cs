@@ -32,9 +32,10 @@ public class ElasticsearchService {
         }
     }
     
-    public async Task<IndexResponse> IndexDocumentAsync(Document document) {
+    public async Task<IndexResponse> IndexDocumentAsync(DocumentEntity document) {
 
-        var indexResponse = await _elasticClient.IndexAsync(document, i => i.Index("documents"));
+        var indexResponse = await _elasticClient.IndexAsync(document,
+            i => i.Index("documents").Id(document.Id));
         if (!indexResponse.IsValidResponse) {
             _logger.LogError($"Error indexing document {document.Id}: {indexResponse.DebugInformation}");
             return indexResponse;
@@ -68,8 +69,18 @@ public class ElasticsearchService {
                 .Field(f => f.Author)
                 .Field(f => f.Title)
                 .Query(searchTerm)
-                .Fuzziness(new Fuzziness(2)))));
-
+                .Fuzziness(new Fuzziness(2))
+                .PrefixLength(1)
+            )).Explain());
+        
+        return response;
+    }
+    
+    public async Task<SearchResponse<Document>> SearchDocumentsQueryAsync(string searchTerm) {
+        var response = await _elasticClient.SearchAsync<Document>(s => s
+            .Index("documents")
+            .Query(q => q.QueryString(qs => qs.Query($"*{searchTerm}*"))));
+        
         return response;
     }
 }

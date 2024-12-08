@@ -33,7 +33,7 @@ namespace DocManSys_RestAPI {
         private static async Task EnsureElasticsearchIsHealthyAsync(IHost app) {
             var elasticClient = app.Services.GetRequiredService<ElasticsearchClient>();
             int retryCount = 0;
-            int maxRetries = 15;
+            int maxRetries = 20;
             TimeSpan delay = TimeSpan.FromSeconds(6);
 
             while (retryCount < maxRetries) {
@@ -60,7 +60,7 @@ namespace DocManSys_RestAPI {
         public static void Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
             
-            //builder.Configuration.AddJsonFile("rest.appsettings.json", optional: false, reloadOnChange: true);
+            builder.Configuration.AddJsonFile("appsettings.Rest-API.json", optional: false, reloadOnChange: true);
             
             //logging
             builder.Logging.ClearProviders();
@@ -89,6 +89,7 @@ namespace DocManSys_RestAPI {
             
             var elasticUri = builder.Configuration.GetConnectionString("ElasticSearch") ?? "http://elasticsearch:9200";
             builder.Services.AddSingleton(new ElasticsearchClient(new Uri(elasticUri)));
+            builder.Services.AddSingleton<ElasticsearchService>();
             
             builder.Services.AddControllers();
 

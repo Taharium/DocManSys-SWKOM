@@ -205,30 +205,42 @@ namespace DocManSys_RestAPI.Controllers {
         public async Task<IActionResult> PostDocument(Document document) {
             var client = _clientFactory.CreateClient("DocManSys-DAL");
             var item = _mapper.Map<DocumentEntity>(document);
+
+            // Step 1: Save the item to the database first
             var response = await client.PostAsJsonAsync("api/DAL/document", item);
-            if (response.IsSuccessStatusCode) {
-                try {
-                    _logger.LogInformation($"Added Document with ID: {document.Id}");
-                    var indexResponse = await _elasticsearchService.IndexDocumentAsync(document);
-
-                    if (!indexResponse.IsValidResponse) {
-                        return StatusCode(500,
-                            new { message = "Failed to index document", details = indexResponse.DebugInformation });
-                    }
-                    //_messageQueueService.SendToQueue($"{document.Id}|{document.Title}");
-                }
-                catch (Exception e) {
-                    _logger.LogError($"Error while sending message to RabbitMQ: {e.Message}");
-                    return StatusCode(500, $"Error while sending message to RabbitMQ: {e.Message}");
-                }
-
-                return CreatedAtAction(nameof(GetDocument), new { id = item.Id }, item);
+            if (!response.IsSuccessStatusCode) {
+                return StatusCode((int)response.StatusCode,
+                    new { message = "Failed to save document to the database" });
             }
 
-            _logger.LogError(
-                $"Failed to write new Document into Database with the Document Title: {document.Title} and Author: {document.Author} ");
-            return StatusCode((int)response.StatusCode, "Error creating Document in DAL");
+            // Get the updated item (with its database ID populated)
+            var savedItem = await response.Content.ReadFromJsonAsync<DocumentEntity>();
+
+            if (savedItem == null || savedItem.Id == 0) {
+                return StatusCode(500, new { message = "Failed to retrieve saved document with generated ID" });
+            }
+
+            try {
+                _logger.LogInformation($"Added Document with ID: {savedItem.Id}");
+
+                // Step 2: Index the document in Elasticsearch using the database ID
+                var indexResponse = await _elasticsearchService.IndexDocumentAsync(savedItem);
+
+                if (!indexResponse.IsValidResponse) {
+                    return StatusCode(500,
+                        new { message = "Failed to index document", details = indexResponse.DebugInformation });
+                }
+                //_messageQueueService.SendToQueue($"{savedItem.Id}|{savedItem.Title}");
+            }
+            catch (Exception e) {
+                _logger.LogError($"Error while sending message to RabbitMQ: {e.Message}");
+                return StatusCode(500, $"Error while sending message to RabbitMQ: {e.Message}");
+            }
+
+            // Step 3: Return the result
+            return CreatedAtAction(nameof(GetDocument), new { id = savedItem.Id }, savedItem);
         }
+
 
         // GET: api/document/download/empty_doc.pdf
         /// <summary>
@@ -276,7 +288,7 @@ namespace DocManSys_RestAPI.Controllers {
             if (response.IsSuccessStatusCode) {
                 var result = await _minioclientservice.DeleteFile(document.Title);
                 var deleteResponse = await _elasticsearchService.DeleteDocumentAsync(id);
-                
+
                 _logger.LogInformation(result.ToString());
                 _logger.LogInformation($"Deleted Document with ID: {id}");
                 return NoContent();
@@ -292,7 +304,7 @@ namespace DocManSys_RestAPI.Controllers {
         /// </summary>
         /// <param name="searchTerm">The search term to look for. Supports minor variations due to fuzziness.</param>
         /// <returns>
-        /// An IActionResult containing the search results or an error message if the input is invalid.
+        /// An IActionResult containing the search results or nothing if the input is invalid.
         /// </returns>
         [HttpPost("search/fuzzy")]
         public async Task<IActionResult> SearchByFuzzy([FromBody] string searchTerm) {
@@ -305,13 +317,32 @@ namespace DocManSys_RestAPI.Controllers {
             return HandleSearchResponse(response);
         }
 
+        // POST api/document/search/querystring
+        /// <summary>
+        /// Performs a wildcard search on the "documents" index in Elasticsearch.
+        /// </summary>
+        /// <param name="searchTerm">The search term to look for.</param>
+        /// <returns>
+        /// An IActionResult containing the search results or nothing if the input is invalid.
+        /// </returns>
+        [HttpPost("search/querystring")]
+        public async Task<IActionResult> SearchByQueryString([FromBody] string searchTerm) {
+            if (string.IsNullOrWhiteSpace(searchTerm)) {
+                return BadRequest(new { message = "Search term cannot be empty" });
+            }
+
+            var response = await _elasticsearchService.SearchDocumentsQueryAsync(searchTerm);
+
+            return HandleSearchResponse(response);
+        }
+        
         private IActionResult HandleSearchResponse(SearchResponse<Document> response) {
             if (response.IsValidResponse) {
                 if (response.Documents.Any()) {
                     return Ok(response.Documents);
                 }
 
-                return NotFound(new { message = "No documents found matching the search term." });
+                return NoContent();
             }
 
             return StatusCode(500, new { message = "Failed to search documents", details = response.DebugInformation });
