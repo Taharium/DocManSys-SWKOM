@@ -9,24 +9,24 @@ namespace DocManSys_RestAPI.Services
     {
         private readonly IMinioClient _minioClient;
 
-        public string Bucket { get; private set; }
+        public string? Bucket { get; private set; }
 
-        public MinioClientService()
+        public MinioClientService(IConfiguration configuration)
         {
             _minioClient = new MinioClient()
-                .WithEndpoint("minio:9000")
-                .WithCredentials("minioadmin", "minioadmin")
-                .WithSSL(false)
-                .Build();
-            Bucket = "uploads";
+               .WithEndpoint(configuration["MinIOCredentials:MinIOEndpoint"])
+               .WithCredentials(configuration["MinIOCredentials:MinIOAccessKey"], configuration["MinIOCredentials:MinIOSecretKey"])
+               .WithSSL(false)
+               .Build();
+            Bucket = configuration["MinIOCredentials:MinIOBucketName"];
         }
 
         // Constructor for testing purposes
-        public MinioClientService(IMinioClient minioClient)
-        {
-            _minioClient = minioClient;
-            Bucket = "uploads";
-        }
+        //public MinioClientService(IMinioClient minioClient)
+        //{
+        //    _minioClient = minioClient;
+        //    Bucket = "uploads";
+        //}
 
 
         public async Task UploadFile(IFormFile file)

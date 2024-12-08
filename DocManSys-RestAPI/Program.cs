@@ -12,7 +12,9 @@ namespace DocManSys_RestAPI {
     public class Program {
         public static void Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
-            
+
+            builder.Configuration.AddJsonFile("rest.appsettings.json", optional: false, reloadOnChange: true);
+
             //logging
             builder.Logging.ClearProviders();
             builder.Logging.AddProvider(new Log4NetProvider());
@@ -34,6 +36,7 @@ namespace DocManSys_RestAPI {
                     });
             });
 
+            builder.Services.AddControllers();
             builder.Services.AddSingleton<IMinioClientService, MinioClientService>();
             builder.Services.AddSingleton<IMessageQueueService, MessageQueueService>();
             builder.Services.AddHostedService<RabbitMqListenerService>();
@@ -41,7 +44,6 @@ namespace DocManSys_RestAPI {
             var elasticUri = builder.Configuration.GetConnectionString("ElasticSearch") ?? "http://elasticsearch:9200";
             builder.Services.AddSingleton(new ElasticsearchClient(new Uri(elasticUri)));
 
-            builder.Services.AddControllers();
 
             //mapper
             // Add services to the container.
