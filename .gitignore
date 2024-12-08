@@ -402,3 +402,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 DocManSys-RestAPI/appsettings.Rest-API.json
+/DocManSys-RestAPI/rest.appsettings.json
