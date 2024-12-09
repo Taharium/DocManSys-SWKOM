@@ -176,7 +176,7 @@ public class DocumentControllerDalTestsPost
         var result = await _controller.AddDocument(documentEntity);
 
         // Assert
-        Assert.IsInstanceOf<OkResult>(result);
+        Assert.IsInstanceOf<OkObjectResult>(result);
         A.CallTo(() => _fakeDocumentRepository.AddDocumentAsync(documentEntity)).MustHaveHappenedOnceExactly();
     }
 

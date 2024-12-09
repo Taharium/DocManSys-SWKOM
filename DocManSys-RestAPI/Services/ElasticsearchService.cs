@@ -64,15 +64,13 @@ public class ElasticsearchService {
     public async Task<SearchResponse<Document>> SearchDocumentsFuzzyAsync(string searchTerm) {
         var response = await _elasticClient.SearchAsync<Document>(s => s
             .Index("documents")
-            .Query(q => q.Match(m => m
-                .Field(f => f.OcrText)
-                .Field(f => f.Author)
-                .Field(f => f.Title)
-                .Query(searchTerm)
+            .Query(q => q.Fuzzy(m => m
+                .Field(p => p.Author)
+                .Field(p => p.Title)
+                .Field(p => p.OcrText)
+                .Value(searchTerm)
                 .Fuzziness(new Fuzziness(2))
-                .PrefixLength(1)
-            )).Explain());
-        
+            )));
         return response;
     }
     
@@ -80,7 +78,6 @@ public class ElasticsearchService {
         var response = await _elasticClient.SearchAsync<Document>(s => s
             .Index("documents")
             .Query(q => q.QueryString(qs => qs.Query($"*{searchTerm}*"))));
-        
         return response;
     }
 }

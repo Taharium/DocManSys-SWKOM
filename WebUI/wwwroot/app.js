@@ -8,7 +8,7 @@ function fillCard(doc){ //decodeURIComponent('${encodeURIComponent(JSON.stringif
                             <strong class="align-self-start me-2">Author:</strong> <span>${doc.author}</span>
                         </div>
                         <div class="d-flex">
-                            <strong class="align-self-start me-2">Title:</strong> <a href="#" onclick="downloadFile('${doc.title}')">${doc.title}</a>
+                            <strong class="align-self-start me-2">Title:</strong> <a href="#"  onclick="downloadFile('${doc.title}')"><div class="text-break">${doc.title}</div></a>
                         </div>
                     </div>
                     
@@ -49,7 +49,6 @@ function fetchDocuments() {
                 const li = document.createElement('li');
                 li.innerHTML = fillCard(doc);
                 documentList.appendChild(li);
-                console.log(doc.id)
             });
         })
         .catch(error => {
@@ -90,10 +89,6 @@ function addDocument() {
         title: "empty_doc.pdf",
     };
     
-    console.log(author)
-    
-    console.log(JSON.stringify(newDocument))
-
     fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -102,7 +97,6 @@ function addDocument() {
         body: JSON.stringify(newDocument)
     })
         .then(response => {
-            console.log(response)
             if (response.ok) {
                 author.value = ""
                 errorDiv.innerHTML = "";
@@ -169,6 +163,7 @@ function toggleComplete(id, isComplete, name) {
 
 function searchDocument(){
     let text = document.getElementById("searchDoc").value;
+    let selectedQuery = document.getElementById("dropdown").value;
     if(text === ""){
         fetchDocuments()
         return;
@@ -176,8 +171,8 @@ function searchDocument(){
     if(text.length < 3){
         return;
     }
-    const searchUrl = `${apiUrl}/search/querystring`;
-
+    
+    const searchUrl = `${apiUrl}/search/${selectedQuery}`;
 
     fetch(searchUrl, {
         method: 'POST',
@@ -186,9 +181,11 @@ function searchDocument(){
         },
         body: JSON.stringify(text) // Send the search term in the body
     })
-        .then(response =>
-            response.json()
-        )
+        .then(response => {
+            if(response.status === 200) {
+                return response.json()
+            }
+        })
         .then(data => {
             const documentList = document.getElementById('documentList');
             documentList.innerHTML = '';
@@ -198,7 +195,6 @@ function searchDocument(){
                 documentList.appendChild(li)
                 return
             }
-            console.log(data)
             data.forEach(doc => {
                 const li = document.createElement('li');
                 li.innerHTML = fillCard(doc);
@@ -210,7 +206,6 @@ function searchDocument(){
 }
 
 function downloadFile(fileName) {
-    console.log(fileName);
     const fileUrl = `${apiUrl}/download/${fileName}`;
 
     const link = document.createElement('a');

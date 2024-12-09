@@ -6,6 +6,11 @@
     list-style-type: none;
 }
 
+#dropdown {
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+}
+
 #throbber {
     display: none; /* Initially hidden */
     margin: 20px auto;

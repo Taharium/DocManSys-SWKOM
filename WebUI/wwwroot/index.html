@@ -41,18 +41,27 @@
     <h1 class="h1" >Welcome to DocManSys</h1>
     <p class="lead">A simple way to upload and search documents!</p>
     <div class=" m-2 d-flex align-self-center justify-content-center col-xl-8 col-lg-9 col-12">
-        <div class="col me-2 d-flex flex-column">
+        <div class="d-flex col flex-column me-2">
             <label for="searchDoc" class="align-self-start form-label">Please type more than 3 letters</label>
-            <input id="searchDoc" onkeyup="searchDocument()" class=" shadow-sm form-control " type="search" placeholder="Search" aria-label="Search">
+            <div class="input-group">
+                <input onkeyup="searchDocument()" id="searchDoc" type="search" class="shadow-sm form-control" aria-label="Search">
+                <div class="col-3">
+                    <select id="dropdown" class="form-select col-3 shadow-sm">
+                        <option value="querystring">Wildcard</option>
+                        <option value="fuzzy">Fuzzy</option>
+                    </select>
+                </div>
+            </div>
         </div>
+        
         <div class="align-self-end " > <!--col-xl-2 col-lg-3 col-3 col-sm-3-->
             <button type="button" class=" btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                 Add Document
             </button>
         </div>
     </div>
-    <div id="container" class="shadow-sm bg-white border rounded p-3 flex-wrap noBulletPoints">
-        <ul id="documentList" class="noBulletPoints overflow-y-auto "></ul>
+    <div id="containerList" class="shadow-sm bg-white border rounded flex-wrap noBulletPoints">
+        <ul id="documentList" class="m-0 p-0 p-2 noBulletPoints overflow-y-auto "></ul>
         <div id="throbber"></div>
     </div>
     <!---->
@@ -110,6 +119,8 @@
             </div>
         </form>
     </div>-->
+    
+
 
 </body>
 </html>
