@@ -9,53 +9,8 @@ using FluentValidation.AspNetCore;
 
 namespace DocManSys_RestAPI {
     public class Program {
-        private static async Task EnsureIndexExistsAsync(IHost app) {
-            var elasticClient = app.Services.GetRequiredService<ElasticsearchClient>();
-
-            // Check if the index exists
-            var indexExists = await elasticClient.Indices.ExistsAsync("documents");
-            if (!indexExists.Exists) {
-                // If the index doesn't exist, create it with mappings (if needed)
-                await elasticClient.Indices.CreateAsync<Document>(c => c
-                    .Index("documents")
-                    .Mappings(m => m
-                        .Properties(p => p
-                            .Text(d => d.OcrText)
-                            .Text(d => d.Title)
-                            .Text(d => d.Author)
-                        )
-                    )
-                );
-                Console.WriteLine("Elasticsearch index 'documents' created.");
-            }
-        }
-
-        private static async Task EnsureElasticsearchIsHealthyAsync(IHost app) {
-            var elasticClient = app.Services.GetRequiredService<ElasticsearchClient>();
-            int retryCount = 0;
-            int maxRetries = 20;
-            TimeSpan delay = TimeSpan.FromSeconds(6);
-
-            while (retryCount < maxRetries) {
-                try {
-                    var healthResponse = await elasticClient.Cluster.HealthAsync();
-
-                    if (healthResponse.IsValidResponse && healthResponse.Status != HealthStatus.Red) {
-                        Console.WriteLine("Elasticsearch is healthy.");
-                        return; // Elasticsearch is healthy, exit
-                    }
-                }
-                catch (Exception ex) {
-                    Console.WriteLine($"Error connecting to Elasticsearch: {ex.Message}");
-                }
-
-                retryCount++;
-                Console.WriteLine($"Retrying Elasticsearch connection... Attempt {retryCount}/{maxRetries}");
-                await Task.Delay(delay);
-            }
-
-            throw new Exception("Elasticsearch did not become healthy after several retries.");
-        }
+        
+        
 
         public static void Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
@@ -111,8 +66,6 @@ namespace DocManSys_RestAPI {
                 client => { client.BaseAddress = new Uri("http://docmansys-dal:8082"); });
 
             var app = builder.Build();
-            Task.Run(async () => await EnsureElasticsearchIsHealthyAsync(app)).GetAwaiter().GetResult();
-            Task.Run(async () => await EnsureIndexExistsAsync(app)).GetAwaiter().GetResult();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment()) {
