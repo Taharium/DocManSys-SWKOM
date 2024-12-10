@@ -34,22 +34,24 @@ namespace DocManSys_RestAPI.Controllers {
             _elasticsearchService = elasticsearchService;
         }
 
-        // GET: api/Document
         /// <summary>
-        /// Get all documents
+        /// Retrieves all documents.
         /// </summary>
-        /// <returns>IEnumerable<Document></Document>></returns>
+        /// <remarks>
+        /// This endpoint fetches all documents from the underlying data source.
+        /// </remarks>
+        /// <returns>A list of all documents.</returns>
+        /// <response code="200">Returns the list of documents.</response>
+        /// <response code="500">If there is an error fetching documents from the DAL.</response>
         [HttpGet]
-        public async Task<IActionResult> GetDocuments([FromQuery] string searchTerm = "") {
+        [ProducesResponseType(typeof(IEnumerable<Document>), 200)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> GetDocuments() {
             _logger.LogInformation("TEST");
 
             var client = _clientFactory.CreateClient("DocManSys-DAL");
-            string requestUri = "api/DAL/document";
-            if (!string.IsNullOrEmpty(searchTerm)) {
-                requestUri += $"?searchTerm={Uri.EscapeDataString(searchTerm)}"; // URL encode the search term
-            }
 
-            var response = await client.GetAsync(requestUri);
+            var response = await client.GetAsync("api/DAL/document");
             if (response.IsSuccessStatusCode) {
                 var items = await response.Content.ReadFromJsonAsync<IEnumerable<DocumentEntity>>();
                 var documents = _mapper.Map<IEnumerable<Document>>(items);
@@ -61,13 +63,19 @@ namespace DocManSys_RestAPI.Controllers {
             return StatusCode((int)response.StatusCode, "Error retrieving Documents from DAL");
         }
 
-        // GET: api/Document/5
+
         /// <summary>
-        /// Get a document by id
+        /// Retrieves a specific document by its ID.
         /// </summary>
-        /// <param name="id">Id of the document that should be searched for</param>
-        /// <returns><Document></Document>></returns>
+        /// <param name="id">The unique identifier of the document.</param>
+        /// <returns>The document corresponding to the specified ID.</returns>
+        /// <response code="200">Returns the requested document.</response>
+        /// <response code="404">If the document is not found.</response>
+        /// <response code="500">If there's an error retrieving the document from the data source.</response>
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(Document), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetDocument(int id) {
             var client = _clientFactory.CreateClient("DocManSys-DAL");
             var response = await client.GetAsync($"api/DAL/document/{id}");
@@ -87,15 +95,19 @@ namespace DocManSys_RestAPI.Controllers {
             return StatusCode((int)response.StatusCode, "Error retrieving Document from DAL");
         }
 
-        // PUT: api/Document/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         /// <summary>
-        /// Update Document entry
+        /// Updates an existing document by ID.
         /// </summary>
-        /// <param name="id">Id of the document that should be updated</param>
-        /// <param name="document">the data that should be in the updated document</param>
-        /// <returns>Returns bad Status Codes if something went wrong</returns>
+        /// <param name="id">The ID of the document to update.</param>
+        /// <param name="document">The updated document object.</param>
+        /// <returns>No content on success.</returns>
+        /// <response code="204">If the document was successfully updated.</response>
+        /// <response code="400">If the provided ID does not match the document ID.</response>
+        /// <response code="500">If there's an error updating the document in the data source.</response>
         [HttpPut("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> PutDocument(int id, Document document) {
             if (id != document.Id) return BadRequest();
             _logger.LogInformation($@"[PUT] Incomming OcrText: {document.OcrText}");
@@ -113,14 +125,21 @@ namespace DocManSys_RestAPI.Controllers {
         }
 
 
-        // PUT: api/Document/5/upload
         /// <summary>
-        /// Upload a Document File
+        /// Uploads a file for the specified document and updates the document metadata.
         /// </summary>
-        /// <param name="id">id of the document that should be updated</param>
-        /// <param name="documentFile">File of the document that should be added</param>
-        /// <returns>Returns bad Status Codes if something went wrong</returns>
+        /// <param name="id">The ID of the document to which the file belongs.</param>
+        /// <param name="documentFile">The file to be uploaded (must be a PDF).</param>
+        /// <returns>A message indicating the result of the operation.</returns>
+        /// <response code="200">If the file was successfully uploaded and metadata updated.</response>
+        /// <response code="400">If the input is invalid (e.g., missing or invalid file type).</response>
+        /// <response code="404">If the document with the specified ID is not found.</response>
+        /// <response code="500">If an internal server error occurs during the operation.</response>
         [HttpPut("{id}/upload")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> UploadFile(int id, IFormFile? documentFile) {
             if (documentFile == null || documentFile.Length == 0) {
                 ModelState.AddModelError("documentFile", "No File Uploaded.");
@@ -194,19 +213,23 @@ namespace DocManSys_RestAPI.Controllers {
             return Ok(new { message = $"Filename {documentFile.FileName} for document {id} successfully saved." });
         }
 
-        // POST: api/Document
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         /// <summary>
-        /// Create a new Document entry
+        /// Creates a new document and indexes it in Elasticsearch.
         /// </summary>
-        /// <param name="document">new document that should be added in the database</param>
-        /// <returns><CreatedAtAction></CreatedAtAction>></returns>
+        /// <param name="document">The document to be created.</param>
+        /// <returns>Returns the created document with its generated ID.</returns>
+        /// <response code="201">Document successfully created and indexed.</response>
+        /// <response code="400">Invalid document data.</response>
+        /// <response code="500">Internal server error while saving or indexing the document.</response>
+        [HttpPost]
+        [ProducesResponseType(typeof(Document), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         [HttpPost]
         public async Task<IActionResult> PostDocument(Document document) {
             var client = _clientFactory.CreateClient("DocManSys-DAL");
             var item = _mapper.Map<DocumentEntity>(document);
 
-            // Step 1: Save the item to the database first
             var response = await client.PostAsJsonAsync("api/DAL/document", item);
             if (!response.IsSuccessStatusCode) {
                 return StatusCode((int)response.StatusCode,
@@ -215,7 +238,6 @@ namespace DocManSys_RestAPI.Controllers {
 
             // Get the updated item (with its database ID populated)
             var savedItem = await response.Content.ReadFromJsonAsync<DocumentEntity>();
-
             if (savedItem == null || savedItem.Id == 0) {
                 return StatusCode(500, new { message = "Failed to retrieve saved document with generated ID" });
             }
@@ -223,36 +245,33 @@ namespace DocManSys_RestAPI.Controllers {
             try {
                 _logger.LogInformation($"Added Document with ID: {savedItem.Id}");
 
-                // Step 2: Index the document in Elasticsearch using the database ID
                 var indexResponse = await _elasticsearchService.IndexDocumentAsync(savedItem);
-
                 if (!indexResponse.IsValidResponse) {
                     return StatusCode(500,
                         new { message = "Failed to index document", details = indexResponse.DebugInformation });
                 }
-                //_messageQueueService.SendToQueue($"{savedItem.Id}|{savedItem.Title}");
             }
             catch (Exception e) {
                 _logger.LogError($"Error while sending message to RabbitMQ: {e.Message}");
                 return StatusCode(500, $"Error while sending message to RabbitMQ: {e.Message}");
             }
 
-            // Step 3: Return the result
             return CreatedAtAction(nameof(GetDocument), new { id = savedItem.Id }, savedItem);
         }
 
 
-        // GET: api/document/download/empty_doc.pdf
         /// <summary>
-        /// Download a file from the server.
+        /// Downloads a file from the server by its name.
         /// </summary>
         /// <param name="fileName">The name of the file to be downloaded.</param>
-        /// <returns>
-        /// status codes:
-        /// - 200 OK: The file is returned successfully.
-        /// - 404 Not Found: The specified file does not exist.
-        /// </returns>
+        /// <returns>Returns the file for download or a 404 if the file is not found.</returns>
+        /// <response code="200">File successfully retrieved for download.</response>
+        /// <response code="404">The requested file was not found on the server.</response>
+        /// <response code="500">Internal server error while retrieving the file.</response>
         [HttpGet("download/{fileName}")]
+        [ProducesResponseType(typeof(FileResult), 200)]
+        [ProducesResponseType(typeof(Object), 404)]
+        [ProducesResponseType(typeof(Object), 500)] 
         public IActionResult DownloadFile(string fileName) {
             // Combine the requested file with the uploads path
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", fileName);
@@ -269,13 +288,19 @@ namespace DocManSys_RestAPI.Controllers {
             return PhysicalFile(filePath, contentType, fileName);
         }
 
-        // DELETE: api/Document/5
         /// <summary>
-        /// Delete a Document entry
+        /// Deletes a document by its ID.
         /// </summary>
-        /// <param name="id">id of the document that should be deleted</param>
-        /// <returns>Returns bad Status Codes if something went wrong</returns>
+        /// <param name="id">The ID of the document to be deleted.</param>
+        /// <returns>Returns a 204 No Content if the document is successfully deleted, or a 404 if the document does not exist.</returns>
+        /// <response code="204">Document successfully deleted.</response>
+        /// <response code="400">Invalid ID supplied.</response>
+        /// <response code="404">Document not found.</response>
+        /// <response code="500">Internal server error while deleting the document.</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> DeleteDocument(int id) {
             var documentresult = await GetDocument(id);
             if (documentresult is NotFoundResult) {
@@ -298,15 +323,18 @@ namespace DocManSys_RestAPI.Controllers {
             return StatusCode((int)response.StatusCode, "Error deleting Document in DAL");
         }
 
-        // POST api/document/search/fuzzy
         /// <summary>
-        /// Performs a fuzzy search on the "documents" index in Elasticsearch.
+        /// Searches for documents using a fuzzy search term.
         /// </summary>
-        /// <param name="searchTerm">The search term to look for. Supports minor variations due to fuzziness.</param>
-        /// <returns>
-        /// An IActionResult containing the search results or nothing if the input is invalid.
-        /// </returns>
+        /// <param name="searchTerm">The term to search for in the documents.</param>
+        /// <returns>Returns a list of documents that match the fuzzy search term.</returns>
+        /// <response code="200">Search results successfully returned (list of Documents).</response>
+        /// <response code="204">No matching document</response>
+        /// <response code="500">Internal server error while performing the search.</response>
         [HttpPost("search/fuzzy")]
+        [ProducesResponseType(typeof(IEnumerable<Document>), 200)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> SearchByFuzzy([FromBody] string searchTerm) {
             if (string.IsNullOrWhiteSpace(searchTerm)) {
                 return BadRequest(new { message = "Search term cannot be empty" });
@@ -317,15 +345,18 @@ namespace DocManSys_RestAPI.Controllers {
             return HandleSearchResponse(response);
         }
 
-        // POST api/document/search/querystring
         /// <summary>
-        /// Performs a wildcard search on the "documents" index in Elasticsearch.
+        /// Searches for documents using a search term passed as a query string.
         /// </summary>
-        /// <param name="searchTerm">The search term to look for.</param>
-        /// <returns>
-        /// An IActionResult containing the search results or nothing if the input is invalid.
-        /// </returns>
+        /// <param name="searchTerm">The term to search for in the documents.</param>
+        /// <returns>Returns a list of documents that match the search term.</returns>
+        /// <response code="200">Search results successfully returned (list of Documents).</response>
+        /// <response code="204">No matching document</response>
+        /// <response code="500">Internal server error while performing the search.</response>
         [HttpPost("search/querystring")]
+        [ProducesResponseType(typeof(IEnumerable<Document>), 200)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> SearchByQueryString([FromBody] string searchTerm) {
             if (string.IsNullOrWhiteSpace(searchTerm)) {
                 return BadRequest(new { message = "Search term cannot be empty" });

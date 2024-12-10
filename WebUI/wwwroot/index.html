@@ -22,17 +22,7 @@
                     <li class="nav-item ">
                         <a class="nav-link" href="index.html">Home</a>
                     </li>
-                    <!--<li class="nav-item ">
-                        <button class="nav-link" onclick="showMain()">Home</button>
-                    </li>
-                    <li class="nav-item ">
-                        <button class="nav-link" onclick="showAddDocument()">Add Document</button>
-                    </li>-->
                 </ul>
-                <!--<form id="searchDocument" class="col d-flex" role="search">
-                    <input onkeydown="" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    &lt;!&ndash;<button class="btn btn-outline-success" type="submit">Search</button>&ndash;&gt;
-                </form>-->
             </div>
         </div>
     </nav>
@@ -40,12 +30,12 @@
 <div id="main" class="d-flex flex-column container text-center mt-5">
     <h1 class="h1" >Welcome to DocManSys</h1>
     <p class="lead">A simple way to upload and search documents!</p>
-    <div class=" m-2 d-flex align-self-center justify-content-center col-xl-8 col-lg-9 col-12">
+    <div class=" m-2 d-flex align-self-center justify-content-center col-xl-9 col-lg-11 col-md-12 col-12">
         <div class="d-flex col flex-column me-2">
             <label for="searchDoc" class="align-self-start form-label">Please type more than 3 letters</label>
             <div class="input-group">
                 <input onkeyup="searchDocument()" id="searchDoc" type="search" class="shadow-sm form-control" aria-label="Search">
-                <div class="col-3">
+                <div class="col-2">
                     <select id="dropdown" class="form-select col-3 shadow-sm">
                         <option value="querystring">Wildcard</option>
                         <option value="fuzzy">Fuzzy</option>
@@ -89,38 +79,6 @@
             </div>
         </div>
     </div>
-
-    <!--Add content
-    <div id="add" class="container text-center mt-5">
-        <h1 class="h1" >Add a New Document</h1>
-        <p class="lead">One click is all you need!</p>
-        <form id="documentForm" class="container p-4 bg-light col-xl-8 col-lg-9 col-md-11 col-sm-12 col-12">
-            &lt;!&ndash; Author Field &ndash;&gt;
-            <div class="mb-3">
-                <label for="author" class="form-label">Author</label>
-                <input type="text" class="form-control" id="author" placeholder="Enter author's name" required>
-            </div>
-
-            &lt;!&ndash; Title Field &ndash;&gt;
-            <div class="mb-3">
-                <label for="title" class="form-label">Title</label>
-                <input type="text" class="form-control" id="title" placeholder="Enter document title" required>
-            </div>
-
-            &lt;!&ndash; Image Field &ndash;&gt;
-            <div class="mb-3">
-                <label for="image" class="form-label">Image URL</label>
-                <input type="url" class="form-control" id="image" placeholder="Enter image URL" required>
-            </div>
-
-            &lt;!&ndash; Submit Button &ndash;&gt;
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Submit Document</button>
-            </div>
-        </form>
-    </div>-->
-    
-
 
 </body>
 </html>

@@ -59,30 +59,8 @@ function fetchDocuments() {
 
 // Function to add a new Document
 function addDocument() {
-    //const title = document.getElementById('documentTitle').files[0].name;
     const author = document.getElementById('documentAuthor');
     const errorDiv = document.getElementById('errorDiv');
-    /*const errorAutor = document.getElementById("errorAuthor");
-    const errorTitle = document.getElementById("errorTitle");
-
-    let isValid = true
-    if (author.trim() === '') {
-        errorAutor.innerHTML = "Please enter a Document Author";
-        isValid = false
-    } else {
-        errorAutor.innerHTML = ""
-    }
-
-    if (title.trim() === '') {
-        errorTitle.innerHTML = "Please enter a Document Title";
-        isValid = false
-    } else {
-        errorTitle.innerHTML = ""
-    }
-
-    if (!isValid) {
-        return;
-    }*/
 
     const newDocument = {
         author: author.value,
@@ -127,39 +105,6 @@ function deleteDocument(id) {
         })
         .catch(error => console.error('Fehler:', error));
 }
-
-// Function to toggle complete status
-/*
-function toggleComplete(id, isComplete, name) {
-    // Aufgabe mit umgekehrtem isComplete-Status aktualisieren
-    const updatedDocument = {
-        id: id,  // Die ID des Documents
-        name: name, // Der Name des Documents
-        isComplete: !isComplete // Status umkehren
-    };
-
-    fetch(`${apiUrl}/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updatedDocument)
-    })
-        .then(response => {
-            if (response.ok) {
-                fetchDocuments(); // Liste nach dem Update aktualisieren
-                console.log('Erfolgreich aktualisiert.');
-            } else {
-                console.error('Fehler beim Aktualisieren der Aufgabe.');
-            }
-        })
-        .catch(error => console.error('Fehler:', error));
-}
-*/
-
-
-
 
 function searchDocument(){
     let text = document.getElementById("searchDoc").value;
@@ -221,29 +166,4 @@ function showUpload(id) {
     window.location = `uploadDocument.html?docId=${encodedId}`;
 }
 
-/*function showAddDocument(){
-    const a = document.getElementById("main")
-    a.classList.add("d-none")
-    document.getElementById("add").classList.remove("d-none")
-}
-
-function showMain(){
-    const a = document.getElementById("add");
-    a.classList.add("d-none");
-    document.getElementById("searchDoc").value = '';
-    document.getElementById("main").classList.remove("d-none");
-    fetchDocuments();
-}*/
-
-// Load document items on page load
-// document.addEventListener('DOMContentLoaded', (event) => {
-//     let index = window.location.pathname;
-//     if(index.endsWith("index.html")){
-//         fetchDocuments();
-//     }
-//    
-//     /*document.getElementById("searchDocument").addEventListener("submit", function (e) {
-//         e.preventDefault();
-//     })*/
-// });
 document.addEventListener('DOMContentLoaded', fetchDocuments );
