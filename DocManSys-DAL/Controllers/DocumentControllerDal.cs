@@ -20,9 +20,13 @@ namespace DocManSys_DAL.Controllers {
         }
 
         [HttpGet("{id}")]
-        public async Task<DocumentEntity?> GetDocumentById(int id) {
+        public async Task<IActionResult> GetDocumentById(int id) {
             logger.LogInformation($"DAL: Retrieving Document with ID: {id}");
-            return await documentRepository.GetDocumentByIdAsync(id);
+            var document = await documentRepository.GetDocumentByIdAsync(id);
+            if (document == null) {
+                return NotFound(new { message = $"Document with ID {id} does not exist."} );
+            }
+            return Ok(document);
         }
 
         [HttpPost]

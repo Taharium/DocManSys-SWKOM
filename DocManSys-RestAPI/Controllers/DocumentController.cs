@@ -155,7 +155,7 @@ namespace DocManSys_RestAPI.Controllers {
             var response = await client.GetAsync($"api/DAL/document/{id}");
             if (!response.IsSuccessStatusCode) {
                 _logger.LogError($"Error at retrieving document with ID: {id}");
-                return NotFound($"Error at retrieving document with ID: {id}");
+                return NotFound(new { message = $"Error at retrieving document with ID: {id}"} );
             }
 
             var documentItem = await response.Content.ReadFromJsonAsync<DocumentEntity>();
