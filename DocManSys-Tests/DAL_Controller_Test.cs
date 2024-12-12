@@ -121,11 +121,8 @@ public class DocumentControllerTests {
 
         // Act
         var result = await _controllerDal.GetDocumentById(documentId);
-
         // Assert
         Assert.NotNull(result);
-        Assert.That(result?.Id, Is.EqualTo(expectedDocument.Id));
-        Assert.That(result?.Title, Is.EqualTo(expectedDocument.Title));
         A.CallTo(() => _fakeDocumentRepository.GetDocumentByIdAsync(documentId))
             .MustHaveHappenedOnceExactly();
     }

@@ -23,3 +23,12 @@ echo "Uploading document should fail (not existing id)"
 set /a WRONGID=%DOCID% + 1
 echo %WRONGID%
 curl --location --request PUT "http://localhost:8081/api/RESTAPI/Document/%WRONGID%/upload" --header "Content-Type: multipart/form-data" --form "documentFile=@uploads\\empty_doc.pdf"
+
+echo "Uploading document successfully"
+
+curl --location --request PUT "http://localhost:8081/api/RESTAPI/Document/%DOCID%/upload" --header "Content-Type: multipart/form-data" --form "documentFile=@uploads\\empty_doc.pdf"
+
+echo "Changing uploaded document successfully"
+
+curl --location --request PUT "http://localhost:8081/api/RESTAPI/Document/%DOCID%/upload" --header "Content-Type: multipart/form-data" --form "documentFile=@uploads\\Level_Analysis_Moulahi.pdf"
+
