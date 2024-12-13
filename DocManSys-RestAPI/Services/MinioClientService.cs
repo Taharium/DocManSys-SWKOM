@@ -22,11 +22,11 @@ namespace DocManSys_RestAPI.Services
         }
 
         // Constructor for testing purposes
-        //public MinioClientService(IMinioClient minioClient)
-        //{
-        //    _minioClient = minioClient;
-        //    Bucket = "uploads";
-        //}
+        public MinioClientService(IMinioClient minioClient)
+        {
+            _minioClient = minioClient;
+            Bucket = "test-uploads";
+        }
 
 
         public async Task UploadFile(IFormFile file)
