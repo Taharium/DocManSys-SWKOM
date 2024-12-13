@@ -1,103 +1,97 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-using FakeItEasy;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Minio;
-using Minio.DataModel.Args;
-using NUnit.Framework;
-using DocManSys_RestAPI.Services;
-using System.Text;
+﻿//using System.IO;
+//using System.Threading.Tasks;
+//using FakeItEasy;
+//using Microsoft.AspNetCore.Http;
+//using Microsoft.AspNetCore.Mvc;
+//using Minio;
+//using Minio.DataModel.Args;
+//using NUnit.Framework;
+//using DocManSys_RestAPI.Services;
+//using System.Text;
+//using Minio.DataModel;
+//using NUnit.Framework.Internal;
 
-namespace DocManSys_Tests
-{
-    [TestFixture]
-    public class MinioClientService_Test
-    {
-        //private IMinioClient _fakeMinioClient;
-        //private MinioClientService _minioClientService;
+//namespace DocManSys_Tests
+//{
+//    [TestFixture]
+//    public class MinioClientService_Test
+//    {
+//        private IMinioClient _mockMinioClient;
+//        private MinioClientService _service;
 
-        //[SetUp]
-        //public void Setup()
-        //{
-        //    _fakeMinioClient = A.Fake<IMinioClient>();
-        //    _minioClientService = new MinioClientService(_fakeMinioClient);
-        //}
+//        [SetUp]
+//        public void SetUp()
+//        {
+//            _mockMinioClient = A.Fake<IMinioClient>();
+//            _service = new MinioClientService(_mockMinioClient);
+//        }
 
-        //[Test]
-        //public async Task UploadFile_ShouldCallPutObjectAsync()
-        //{
-        //    // Arrange
-        //    var file = A.Fake<IFormFile>();
-        //    var fileName = "test.txt";
-        //    var fileStream = new MemoryStream(Encoding.UTF8.GetBytes("dummy content"));
-        //    A.CallTo(() => file.FileName).Returns(fileName);
-        //    A.CallTo(() => file.OpenReadStream()).Returns(fileStream);
-        //    A.CallTo(() => file.Length).Returns(fileStream.Length);
+//        [Test]
+//        public async Task UploadFile_ShouldCallPutObjectAsync()
+//        {
+//            // Arrange
+//            var mockFile = A.Fake<IFormFile>();
+//            var fileStream = new MemoryStream();
+//            A.CallTo(() => mockFile.OpenReadStream()).Returns(fileStream);
+//            A.CallTo(() => mockFile.FileName).Returns("test-file.txt");
+//            A.CallTo(() => mockFile.Length).Returns(fileStream.Length);
 
-        //    // Act
-        //    await _minioClientService.UploadFile(file);
+//            // Act
+//            await _service.UploadFile(mockFile);
 
-        //    // Assert
-        //    A.CallTo(() => _fakeMinioClient.PutObjectAsync)
-        //        .MustHaveHappenedOnceExactly();
-        //}
 
-        //[Test]
-        //public async Task DownloadFile_ShouldReturnFileStreamResult()
-        //{
-        //    // Arrange
-        //    var fileName = "test.txt";
-        //    var fileContent = "dummy content";
-        //    var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
-        //    A.CallTo(() => _fakeMinioClient.GetObjectAsync(A<GetObjectArgs>.That.Matches(args =>
-        //        args.BucketName == "uploads" && args.ObjectName == fileName), A<Action<Stream>>.Ignored))
-        //        .Invokes((GetObjectArgs args, Action<Stream> callback) => callback(memoryStream));
+//            // Assert
 
-        //    // Act
-        //    var result = await _minioClientService.DownloadFile(fileName) as FileStreamResult;
+//        }
 
-        //    // Assert
-        //    Assert.IsNotNull(result);
-        //    Assert.That(result.ContentType, Is.EqualTo("application/octet-stream"));
-        //    Assert.That(result.FileDownloadName, Is.EqualTo(fileName));
-        //}
 
-        //[Test]
-        //public async Task DeleteFile_ShouldReturnOkObjectResult()
-        //{
-        //    // Arrange
-        //    var fileName = "test.txt";
 
-        //    // Act
-        //    var result = await _minioClientService.DeleteFile(fileName) as OkObjectResult;
-        //    var resultValue = result.Value as string;
+//        [Test]
+//        public async Task DownloadFile_ShouldReturnFileStreamResult()
+//        {
+//            // Arrange
+//            var fileName = "test-file.txt";
+//            var fileContent = new MemoryStream();
+//            fileContent.Write(new byte[] { 1, 2, 3, 4 });
+//            fileContent.Position = 0;
 
-        //    // Assert
-        //    Assert.IsNotNull(result);
-        //    Assert.That(result.StatusCode, Is.EqualTo(200));
-        //    Assert.That(resultValue, Is.EqualTo($"Datei '{fileName}' erfolgreich gelöscht.")) ;
-        //}
+//            A.CallTo(() => _mockMinioClient.GetObjectAsync(A<GetObjectArgs>.That.Matches(args => args.BucketName == "test-bucket" && args.ObjectName == fileName), A<Stream>.That.IsNotNull())).Invokes(call =>
+//            {
+//                var stream = call.GetArgument<Stream>(1);
+//                fileContent.CopyTo(stream);
+//            });
 
-        //[Test]
-        //public async Task EnsureBucketExists_ShouldCreateBucketIfNotExists()
-        //{
-        //    // Arrange
-        //    A.CallTo(() => _fakeMinioClient.BucketExistsAsync(A<BucketExistsArgs>.That.Matches(args =>
-        //        args.BucketName == "uploads"))).Returns(false);
+//            // Act
+//            var result = await _service.DownloadFile(fileName) as FileStreamResult;
 
-        //    // Act
-        //    await _minioClientService.UploadFile(A.Fake<IFormFile>());
+//            // Assert
+//            Assert.IsNotNull(result);
+//            Assert.That(result.ContentType, Is.EqualTo("application/octet-stream"));
+//            Assert.That(result.FileDownloadName, Is.EqualTo(fileName));
+//        }
 
-        //    // Assert
-        //    A.CallTo(() => _fakeMinioClient.MakeBucketAsync(A<MakeBucketArgs>.That.Matches(args =>
-        //        args.BucketName == "uploads"))).MustHaveHappenedOnceExactly();
-        //}
-        //[TearDown]
-        //public void TearDown()
-        //{
-        //    _fakeMinioClient.Dispose();
-        //}
-    }
-}
+//        [Test]
+//        public async Task DeleteFile_ShouldCallRemoveObjectAsync()
+//        {
+//            // Arrange
+//            var fileName = "test-file.txt";
+
+//            // Act
+//            var result = await _service.DeleteFile(fileName) as OkObjectResult;
+
+//            // Assert
+//            Assert.IsNotNull(result);
+//            Assert.That(result.StatusCode, Is.EqualTo(200));
+//            Assert.That(result.Value, Is.EqualTo($"Datei '{fileName}' erfolgreich gelöscht."));
+
+//            A.CallTo(() => _mockMinioClient.RemoveObjectAsync(A<RemoveObjectArgs>.That.Matches(args => args.BucketName == "test-bucket" && args.ObjectName == fileName))).MustHaveHappened();
+//        }
+
+//        [TearDown]
+//        public void TearDown()
+//        {
+//            _mockMinioClient.Dispose();
+//        }
+//    }
+//}
 
