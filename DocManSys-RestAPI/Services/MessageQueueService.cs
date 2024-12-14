@@ -14,6 +14,13 @@ public class MessageQueueService : IMessageQueueService, IDisposable {
         _channel.QueueDeclare(queue: "file_queue", durable: false, exclusive: false, autoDelete: false,
             arguments: null);
     }
+    
+    public MessageQueueService(IConnection connection)
+    {
+        _connection = connection;
+        _channel = _connection.CreateModel();
+        _channel.QueueDeclare(queue: "file_queue", durable: false, exclusive: false, autoDelete: false, arguments: null);
+    }
 
     public void SendToQueue(string message) {
         var body = Encoding.UTF8.GetBytes(message);

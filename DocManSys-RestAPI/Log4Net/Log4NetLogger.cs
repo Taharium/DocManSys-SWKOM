@@ -4,12 +4,10 @@ using log4net.Config;
 
 namespace DocManSys_RestAPI.Log4Net;
 
-public class Log4NetLogger : ILogger
-{
+public class Log4NetLogger : ILogger {
     private readonly ILog _log;
 
-    public Log4NetLogger(string name, FileInfo fileInfo)
-    {
+    public Log4NetLogger(string name, FileInfo fileInfo) {
         var loggerRepository = LogManager.GetRepository(Assembly.GetEntryAssembly()!);
         _log = LogManager.GetLogger(loggerRepository.Name, name);
 
@@ -18,15 +16,12 @@ public class Log4NetLogger : ILogger
             throw new InvalidOperationException($"LoggerRepository could not be configured!");
     }
 
-    public IDisposable? BeginScope<TState>(TState state) where TState : notnull
-    {
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull {
         return null;
     }
 
-    public bool IsEnabled(LogLevel logLevel)
-    {
-        switch (logLevel)
-        {
+    public bool IsEnabled(LogLevel logLevel) {
+        switch (logLevel) {
             case LogLevel.Critical:
                 return _log.IsFatalEnabled;
             case LogLevel.Debug:
@@ -48,24 +43,19 @@ public class Log4NetLogger : ILogger
         EventId eventId,
         TState state,
         Exception? exception,
-        Func<TState, Exception?, string> formatter)
-    {
-        if (!IsEnabled(logLevel))
-        {
+        Func<TState, Exception?, string> formatter) {
+        if (!IsEnabled(logLevel)) {
             return;
         }
 
-        if (formatter == null)
-        {
+        if (formatter == null) {
             throw new ArgumentNullException(nameof(formatter));
         }
 
         string message = $"{formatter(state, exception)} {exception}";
 
-        if (!string.IsNullOrEmpty(message) || exception != null)
-        {
-            switch (logLevel)
-            {
+        if (!string.IsNullOrEmpty(message) || exception != null) {
+            switch (logLevel) {
                 case LogLevel.Critical:
                     _log.Fatal(message);
                     break;

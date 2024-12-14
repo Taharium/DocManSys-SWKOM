@@ -1,29 +1,38 @@
-﻿namespace DocManSys_OCR_Worker;
-
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using System;
-using System.IO;
+﻿using System.Diagnostics;
 using System.Text;
 using ImageMagick;
-using Tesseract;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+
+namespace DocManSys_OCR_Worker;
 
 public class OcrWorker : IDisposable {
     private IConnection? _connection;
     private IModel? _channel;
+    private readonly IConfiguration _configuration;
 
-    public OcrWorker() {
+    public OcrWorker(IConfiguration configuration)
+    {
+        _configuration = configuration;
         ConnectToRabbitMq();
     }
+    
 
     public void ConnectToRabbitMq() {
+        var hostname = _configuration["RabbitMqSettings:HostName"];
+        var username = _configuration["RabbitMqSettings:UserName"];
+        var password = _configuration["RabbitMqSettings:Password"];
+        
         int retries = 10;
         while (retries > 0) {
             try {
                 var factory = new ConnectionFactory()
-                    { HostName = "rabbitmq", UserName = "user", Password = "password" };
+                {
+                    HostName = hostname,
+                    UserName = username,
+                    Password = password
+                };
+
                 _connection = factory.CreateConnection();
                 _channel = _connection.CreateModel();
                 _channel.QueueDeclare(queue: "file_queue", durable: false, exclusive: false, autoDelete: false,

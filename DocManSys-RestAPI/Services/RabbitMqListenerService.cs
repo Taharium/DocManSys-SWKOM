@@ -1,23 +1,16 @@
-﻿using DocManSys_DAL.Entities;
-using DocManSys_RestAPI.Models;
-
-namespace DocManSys_RestAPI.Services;
-
-using AutoMapper;
-using Microsoft.Extensions.Hosting;
+﻿using System.Text;
+using DocManSys_DAL.Entities;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System.Net.Http;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+
+namespace DocManSys_RestAPI.Services;
 
 public class RabbitMqListenerService : IHostedService {
     private IConnection? _connection;
     private IModel? _channel;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<RabbitMqListenerService> _logger;
-    private readonly ElasticsearchService _elasticsearchService;
+    private readonly IElasticsearchService _elasticsearchService;
 
     public Task StartAsync(CancellationToken cancellationToken) {
         ConnectToRabbitMq();
@@ -25,7 +18,7 @@ public class RabbitMqListenerService : IHostedService {
         return Task.CompletedTask;
     }
 
-    public RabbitMqListenerService(IHttpClientFactory httpClientFactory, ILogger<RabbitMqListenerService> logger, ElasticsearchService elasticsearchService) {
+    public RabbitMqListenerService(IHttpClientFactory httpClientFactory, ILogger<RabbitMqListenerService> logger, IElasticsearchService elasticsearchService) {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
         _elasticsearchService = elasticsearchService;

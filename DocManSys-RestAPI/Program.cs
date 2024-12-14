@@ -6,7 +6,6 @@ using Elastic.Clients.Elasticsearch;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 
-
 namespace DocManSys_RestAPI {
     public class Program {
         
@@ -44,7 +43,7 @@ namespace DocManSys_RestAPI {
             
             var elasticUri = builder.Configuration.GetConnectionString("ElasticSearch") ?? "http://elasticsearch:9200";
             builder.Services.AddSingleton(new ElasticsearchClient(new Uri(elasticUri)));
-            builder.Services.AddSingleton<ElasticsearchService>();
+            builder.Services.AddSingleton<IElasticsearchService, ElasticsearchService>();
             
             builder.Services.AddControllers();
 

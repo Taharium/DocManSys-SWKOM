@@ -1,11 +1,10 @@
 ﻿using DocManSys_DAL.Entities;
 using DocManSys_RestAPI.Models;
 using Elastic.Clients.Elasticsearch;
-using Microsoft.AspNetCore.Mvc;
 
 namespace DocManSys_RestAPI.Services;
 
-public class ElasticsearchService {
+public class ElasticsearchService : IElasticsearchService {
     private readonly ElasticsearchClient _elasticClient;
     private readonly ILogger<ElasticsearchService> _logger;
 
@@ -31,9 +30,8 @@ public class ElasticsearchService {
             return false;
         }
     }
-    
-    public async Task<IndexResponse> IndexDocumentAsync(DocumentEntity document) {
 
+    public async Task<IndexResponse> IndexDocumentAsync(DocumentEntity document) {
         var indexResponse = await _elasticClient.IndexAsync(document,
             i => i.Index("documents").Id(document.Id));
         if (!indexResponse.IsValidResponse) {
@@ -44,14 +42,14 @@ public class ElasticsearchService {
         _logger.LogInformation($"Document {document.Id} indexed successfully.");
         return indexResponse;
     }
-    
-    public async Task<DeleteResponse> DeleteDocumentAsync(int documentId) {
 
+    public async Task<DeleteResponse> DeleteDocumentAsync(int documentId) {
         var deleteResponse = await _elasticClient.DeleteAsync<Document>(documentId, i => i.Index("documents"));
         if (deleteResponse.Result == Result.NotFound) {
             _logger.LogError($"Document with ID {documentId} does not exist.");
             return deleteResponse;
         }
+
         if (!deleteResponse.IsValidResponse) {
             _logger.LogError($"Error deleting document with ID {documentId}: {deleteResponse.DebugInformation}");
             return deleteResponse;
@@ -73,7 +71,7 @@ public class ElasticsearchService {
             )));
         return response;
     }
-    
+
     public async Task<SearchResponse<Document>> SearchDocumentsQueryAsync(string searchTerm) {
         var response = await _elasticClient.SearchAsync<Document>(s => s
             .Index("documents")

@@ -49,6 +49,7 @@ function fetchDocuments() {
                 const li = document.createElement('li');
                 li.innerHTML = fillCard(doc);
                 documentList.appendChild(li);
+                console.log(doc.ocrText)
             });
         })
         .catch(error => {

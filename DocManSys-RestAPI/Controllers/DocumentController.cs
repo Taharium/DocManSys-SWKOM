@@ -1,12 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
-using DocManSys_RestAPI.Models;
 using AutoMapper;
 using DocManSys_DAL.Entities;
+using DocManSys_RestAPI.Models;
 using DocManSys_RestAPI.Services;
-using RabbitMQ.Client.Events;
-using System.Text;
 using Elastic.Clients.Elasticsearch;
-using Minio;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DocManSys_RestAPI.Controllers {
     /// <summary>
@@ -21,11 +18,11 @@ namespace DocManSys_RestAPI.Controllers {
         private readonly IMapper _mapper;
         private readonly IMessageQueueService _messageQueueService;
         private readonly IMinioClientService _minioclientservice;
-        private readonly ElasticsearchService _elasticsearchService;
+        private readonly IElasticsearchService _elasticsearchService;
 
         public DocumentController(IHttpClientFactory clientFactory, ILogger<DocumentController> logger, IMapper mapper,
             IMessageQueueService messageQueueService, IMinioClientService minioClientService,
-            ElasticsearchService elasticsearchService) {
+            IElasticsearchService elasticsearchService) {
             _logger = logger;
             _clientFactory = clientFactory;
             _mapper = mapper;
@@ -160,11 +157,6 @@ namespace DocManSys_RestAPI.Controllers {
 
             var documentItem = await response.Content.ReadFromJsonAsync<DocumentEntity>();
 
-            if (documentItem == null) {
-                _logger.LogError($"Document with ID {id} not found.");
-                return NotFound($"Document with ID {id} not found.");
-            }
-
             var document = _mapper.Map<Document>(documentItem);
 
             _logger.LogInformation($"Title changed to {documentFile.FileName}");
@@ -252,8 +244,8 @@ namespace DocManSys_RestAPI.Controllers {
                 }
             }
             catch (Exception e) {
-                _logger.LogError($"Error while sending message to RabbitMQ: {e.Message}");
-                return StatusCode(500, $"Error while sending message to RabbitMQ: {e.Message}");
+                _logger.LogError($"Error while indexing to elasticSearch: {e.Message}");
+                return StatusCode(500, $"Error while indexing to elasticSearch: {e.Message}");
             }
 
             return CreatedAtAction(nameof(GetDocument), new { id = savedItem.Id }, savedItem);
