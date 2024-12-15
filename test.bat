@@ -1,1 +1,0 @@
-curl -s --location http://localhost:8081/api/RESTAPI/Document --header "Content-Type: application/json" --data "{\"id\": \"1\", \"title\": \"Test\", \"author\": \"Doe\", \"ocrText\": \"This is an example OCR text.\"}" | jq .message
